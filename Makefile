@@ -24,9 +24,10 @@ repo :
 		-t "${TEMPLATE_DIR}" \
 		-c ${CORPUS_NAME} -n ${REPO_NAME} \
 		-r "${REPO_OUT_DIR}" -x "${XLSX}" \
-		-d "${DATA_DIR}" \
+		-d "./files" \
 		-D ${DEBUG} \
 		-p "${TEMP_DIR}" -z "${REPO_SCRATCH_DIR}"
+
 
 
 clean :

@@ -41,3 +41,8 @@ Other columns like language --- need to be there, or inherit from the collection
 
 
 
+
+
+cd portal 
+(base) pt@Peters-MacBook-Pro-2 portal % npm run dev
+
