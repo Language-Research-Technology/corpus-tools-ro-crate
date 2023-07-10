@@ -24,7 +24,11 @@ const { Collector, generateArcpId } = require('oni-ocfl');
 const { DataPack } = require('@describo/data-packs');
 const fs = require('fs-extra');
 const { LdacProfile } = require('ldac-profile');
-const {languageProfileURI, Vocab} = require("language-data-commons-vocabs");
+const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
+const shell = require("shelljs");
+const path = require('path');
+const { isArray } = require('lodash');
+const PRONOM_URI_BASE = 'https://www.nationalarchives.gov.uk/PRONOM/';
 
 async function main() {
 
@@ -39,37 +43,37 @@ async function main() {
         value: "English",
     });
     */
-    engLang =  {
+    engLang = {
         "@id": "https://glottolog.org/resource/languoid/id/stan1293",
         "@type": "Language",
         "languageCode": "stan1293",
         "name": "English",
         "geo": {
-          "@id": "#English"
+            "@id": "#English"
         },
         "source": "Glottolog",
         "sameAs": {
-          "@id": "https://www.ethnologue.com/language/eng"
+            "@id": "https://www.ethnologue.com/language/eng"
         },
         "alternateName": [
-          "English (Standard Southern British)",
-          "Englisch",
-          "Anglais moderne [fr]",
-          "English [en]",
-          "Inglese moderno [it]",
-          "Inglês moderno [pt]",
-          "Modern English [en]",
-          "Moderna angla lingvo [eo]",
-          "Moderne engelsk [no]",
-          "Modernes Englisch [de]",
-          "Nyengelska [sv]",
-          "anglais [fr]",
-          "თანამედროვე ინგლისური პერიოდი [ka]",
-          "現代英語 [zh]",
-          "近代英語 [ja]"
+            "English (Standard Southern British)",
+            "Englisch",
+            "Anglais moderne [fr]",
+            "English [en]",
+            "Inglese moderno [it]",
+            "Inglês moderno [pt]",
+            "Modern English [en]",
+            "Moderna angla lingvo [eo]",
+            "Moderne engelsk [no]",
+            "Modernes Englisch [de]",
+            "Nyengelska [sv]",
+            "anglais [fr]",
+            "თანამედროვე ინგლისური პერიოდი [ka]",
+            "現代英語 [zh]",
+            "近代英語 [ja]"
         ],
         "iso639-3": "eng"
-      }
+    }
 
     const collector = new Collector();
 
@@ -80,11 +84,20 @@ async function main() {
     const corpus = collector.newObject(collector.templateCrateDir);
 
     const corpusCrate = corpus.crate;
-    //corpusCrate.addContext(vocab.getContext());
+
+    corpusCrate.addContext(vocab.getContext());
     const corpusRoot = corpus.rootDataset;
     corpusRoot.language = corpusRoot.language || engLang;
     corpusCrate.addProfile(languageProfileURI('Collection'));
     corpusRoot['@type'] = ['Dataset', 'RepositoryCollection'];
+
+    let siegfriedData = {}
+    let createFile = true;
+    if (fs.existsSync(path.join(collector.dataDir, "siegfriedOutput.json"))) {
+        console.log("Reading SF Data");
+        siegfriedData = JSON.parse(fs.readFileSync(path.join(collector.dataDir, "siegfriedOutput.json")));
+        createFile = false;
+    }
 
     // TODO ADD SF file stuff if not already there @mark
 
@@ -95,79 +108,88 @@ async function main() {
         topLevelObject.mintArcpId();
 
         for (let item of corpusCrate.getGraph()) {
-            if(item["@type"].includes("RepositoryObject")) {
+
+            if (item["@type"].includes("RepositoryObject")) {
                 const itemObject = collector.newObject();
                 itemObject.crate.addProfile(languageProfileURI('Object'));
-        
+
                 for (let prop of Object.keys(item)) {
                     if (prop === "hasPart") {
                         for (let f of item.hasPart) {
                             if (f["@type"] && f["@type"].includes("File")) {
+
+                                if (!f["encodingFormat"][1]["@id"]) {
+                                    let fileSF;
+                                    readSiegfried(f, f["@id"], fileSF, siegfriedData, collector.dataDir)
+                                }
                                 await itemObject.addFile(f, collector.templateCrateDir);
                                 filesDealtWith[f["@id"]] = true;
                             }
                         }
                     } else if (prop === "memberOf") {
                         // BAD HACK ---
-                        itemObject.crate.rootDataset.memberOf = item.memberOf.map((m) => {return {"@id":topLevelObject.id}});
+                        itemObject.crate.rootDataset.memberOf = item.memberOf.map((m) => { return { "@id": topLevelObject.id } });
 
-                    } else
-                     {
+                    } else {
                         itemObject.crate.rootDataset[prop] = item[prop];
                     }
 
 
                 }
-                
+
                 for (let part of item["@reverse"].partOf) {
                     itemObject.crate.addEntity(part);
                     if (part["@type"] && part["@type"].includes("File")) {
+                        if (!part["encodingFormat"][1]["@id"]) {
+                            let fileSF;
+                            readSiegfried(part, part["@id"], fileSF, siegfriedData, collector.dataDir)
+                        }
                         await itemObject.addFile(part, collector.templateCrateDir);
                         filesDealtWith[part["@id"]] = true;
                     }
 
                 }
-                
 
-                itemObject.mintArcpId("object", item["@id"].replace(/#/g,""));
+
+                itemObject.mintArcpId("object", item["@id"].replace(/#/g, ""));
                 itemObject.crate.rootDataset["@id"] = itemObject.id;
                 itemObject.crate.rootDataset["@type"] = item["@type"];
                 itemObject.crate.rootDataset["@type"].push("Dataset");
 
                 // WORSE HACK
-                itemObject.crate.rootDataset.memberOf = {"@id":topLevelObject.id}
-                  
-               
+                itemObject.crate.rootDataset.memberOf = { "@id": topLevelObject.id }
+
+
                 await itemObject.addToRepo();
 
             }
             // Left over parts
 
-           
-                    
 
+
+
+        }
+
+        // Copy pros from the template object to our new top level
+        for (let prop of Object.keys(corpusRoot)) {
+            if (prop === "hasPart") {
+
+            } else if (prop === "hasMember") {
+                console.log("Dealing with members")
+                // TODO: Make sure each member knows its a memberOf (in the case where hasMember has been specified at the top level)
+            } else {
+                topLevelObject.crate.rootDataset[prop] = corpusRoot[prop];
             }
-            
-            // Copy pros from the template object to our new top level
-            for (let prop of Object.keys(corpusRoot)) {
-                if (prop === "hasPart") {
-                    
-                } else if  (prop === "hasMember")  {
-                    console.log("Dealing with members") 
-                    // TODO: Make sure each member knows its a memberOf (in the case where hasMember has been specified at the top level)
-                } else {
-                    topLevelObject.crate.rootDataset[prop] = corpusRoot[prop];
-                }
+        }
+        topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
+        console.log("TOP LEVEL ROOT DATASET", topLevelObject.crate.rootDataset["@id"]);
+
+        for (let item of corpusCrate.getGraph()) {
+            if (item["@type"].includes("File") && !filesDealtWith[item["@id"]]) {
+                await topLevelObject.addFile(item, collector.templateCrateDir)
             }
-            topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
-            console.log("TOP LEVEL ROOT DATASET", topLevelObject.crate.rootDataset["@id"]); 
 
-            for (let item of corpusCrate.getGraph()) {
-                if (item["@type"].includes("File") && !filesDealtWith[item["@id"]]) {
-                    await topLevelObject.addFile(item, collector.templateCrateDir)
-                }
 
-           
 
         }
         await topLevelObject.addToRepo();
@@ -178,7 +200,9 @@ async function main() {
         corpus.mintArcpId();
         for (let item of corpusCrate.getGraph()) {
             if (item["@type"].includes("File")) {
-            await corpus.addFile(item, collector.templateCrateDir);
+                let fileSF;
+                readSiegfried(item, item["@id"], fileSF, siegfriedData, collector.dataDir);
+                await corpus.addFile(item, collector.dataDir);
             }
         }
         await corpus.addToRepo();
@@ -188,6 +212,42 @@ async function main() {
 
 
 
+}
+
+function readSiegfried(objFile, fileID, fileSF, siegfriedData, dataDir) {
+
+    if (siegfriedData[fileID]) {
+        fileSF = siegfriedData[fileIDStore].files[0];
+    } else {
+        let sfData;
+        try {
+            console.log(`Running SF on "${fileID}"`);
+            if (fs.existsSync(path.join(dataDir, fileID))) {
+                sfData = JSON.parse(shell.exec(`sf -nr -json "${path.join(dataDir, fileID)}"`, { silent: true }).stdout);
+            } else {
+                console.log(`Missing file "${fileID}"`);
+            }
+            console.log(sfData)
+        } catch (e) {
+            console.error("File identification error: " + e);
+            console.error("Have you installed Siegfried?");
+            console.error("https://github.com/richardlehane/siegfried/wiki/Getting-started");
+            process.exit(1);
+        }
+        if(typeof sfData!=='undefined'){
+        fileSF = sfData.files[0];
+        siegfriedData[fileID] = sfData;
+        }
+    }
+    if (!objFile['encodingFormat']) {
+        objFile['encodingFormat'] = [];
+    }
+    if (typeof fileSF !== 'undefined') {
+        objFile['encodingFormat'].push(fileSF.matches[0].mime);
+        let formatID = PRONOM_URI_BASE + fileSF.matches[0].id
+        objFile['encodingFormat'].push({ '@id': formatID })
+        objFile['extent'] = fileSF.filesize;
+    }
 }
 
 main()
