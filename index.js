@@ -85,12 +85,12 @@ async function main() {
 
     const corpusCrate = corpus.crate;
 
-    corpusCrate.addContext(vocab.getContext());
+    //corpusCrate.addContext(vocab.getContext());
     const corpusRoot = corpus.rootDataset;
     corpusRoot.language = corpusRoot.language || engLang;
     corpusCrate.addProfile(languageProfileURI('Collection'));
     corpusRoot['@type'] = ['Dataset', 'RepositoryCollection'];
-
+    console.log(corpusRoot["@id"])
     let siegfriedData = {}
     let createFile = true;
     if (fs.existsSync(path.join(collector.dataDir, "siegfriedOutput.json"))) {
@@ -101,7 +101,7 @@ async function main() {
 
     // TODO ADD SF file stuff if not already there @mark
 
-    if (collector.opts.multiple) {
+    //if (collector.opts.multiple) {
         filesDealtWith = {};
         const topLevelObject = collector.newObject(); // Main collection
         topLevelObject.crate.addProfile(languageProfileURI('Collection'));
@@ -140,7 +140,8 @@ async function main() {
                 for (let part of item["@reverse"].partOf) {
                     itemObject.crate.addEntity(part);
                     if (part["@type"] && part["@type"].includes("File")) {
-                        if (!part["encodingFormat"][1]["@id"]) {
+                        
+                        if (!part["encodingFormat"]) {
                             let fileSF;
                             readSiegfried(part, part["@id"], fileSF, siegfriedData, collector.dataDir)
                         }
@@ -164,9 +165,6 @@ async function main() {
 
             }
             // Left over parts
-
-
-
 
         }
 
@@ -196,10 +194,12 @@ async function main() {
         // Now deal with hasParts
 
 
-    } else {
+    /*} else {
         corpus.mintArcpId();
+
         for (let item of corpusCrate.getGraph()) {
             if (item["@type"].includes("File")) {
+              //  item["memberOf"] = {"@id": corpusRoot["@id"]};
                 let fileSF;
                 readSiegfried(item, item["@id"], fileSF, siegfriedData, collector.dataDir);
                 await corpus.addFile(item, collector.dataDir);
@@ -207,7 +207,7 @@ async function main() {
         }
         await corpus.addToRepo();
 
-    }
+    }*/
     // ELSE 
 
 
@@ -225,9 +225,8 @@ function readSiegfried(objFile, fileID, fileSF, siegfriedData, dataDir) {
             if (fs.existsSync(path.join(dataDir, fileID))) {
                 sfData = JSON.parse(shell.exec(`sf -nr -json "${path.join(dataDir, fileID)}"`, { silent: true }).stdout);
             } else {
-                console.log(`Missing file "${fileID}"`);
+                console.log(`Missing file "${path.join(dataDir, fileID)}"`);
             }
-            console.log(sfData)
         } catch (e) {
             console.error("File identification error: " + e);
             console.error("Have you installed Siegfried?");
