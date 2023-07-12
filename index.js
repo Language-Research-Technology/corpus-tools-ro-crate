@@ -145,7 +145,7 @@ async function main() {
                             let fileSF;
                             readSiegfried(part, part["@id"], fileSF, siegfriedData, collector.dataDir)
                         }
-                        await itemObject.addFile(part, collector.templateCrateDir);
+                        await itemObject.addFile(part, collector.dataDir);
                         filesDealtWith[part["@id"]] = true;
                     }
 
