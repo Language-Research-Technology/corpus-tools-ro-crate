@@ -1,0 +1,27 @@
+{
+  "name": "corpus-tools-ro-crate",
+  "version": "1.0.0",
+  "description": "Converts RO-Crate to OCFL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Language-Research-Technology/corpus-tools-ro-crate.git"
+  },
+  "author": "Peter Sefton",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Language-Research-Technology/corpus-tools-ro-crate/issues"
+  },
+  "homepage": "https://github.com/Language-Research-Technology/corpus-tools-ro-crate#readme",
+  "dependencies": {
+    "@describo/data-packs": "^0.8.0",
+    "fs-extra": "^10.0.0",
+    "language-data-commons-vocabs": "github:Language-Research-Technology/language-data-commons-vocabs",
+    "ldac-profile": "github:Language-Research-Technology/ldac-profile",
+    "oni-ocfl": "github:Arkisto-Platform/oni-ocfl",
+    "path": "^0.12.7"
+  }
+}
