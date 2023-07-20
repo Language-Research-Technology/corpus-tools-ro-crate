@@ -36,14 +36,15 @@ async function main() {
     await vocab.load();
 
     const datapack = new DataPack({ dataPacks: ['Glottolog'], indexFields: ['name'] });
-    /* WORK OFFLINE
     await datapack.load();
+   
+
     const engLang = datapack.get({
         field: "name",
         value: "English",
     });
-    */
-    engLang = {
+
+    /*engLang = {
         "@id": "https://glottolog.org/resource/languoid/id/stan1293",
         "@type": "Language",
         "languageCode": "stan1293",
@@ -73,7 +74,7 @@ async function main() {
             "近代英語 [ja]"
         ],
         "iso639-3": "eng"
-    }
+    }*/
 
     const collector = new Collector();
 
@@ -102,96 +103,105 @@ async function main() {
     // TODO ADD SF file stuff if not already there @mark
 
     //if (collector.opts.multiple) {
-        filesDealtWith = {};
-        const topLevelObject = collector.newObject(); // Main collection
-        topLevelObject.crate.addProfile(languageProfileURI('Collection'));
-        topLevelObject.mintArcpId();
+    filesDealtWith = {};
+    const topLevelObject = collector.newObject(); // Main collection
+    topLevelObject.crate.addProfile(languageProfileURI('Collection'));
+    topLevelObject.mintArcpId();
 
-        for (let item of corpusCrate.getGraph()) {
+    for (let item of corpusCrate.getGraph()) {
+        let languages = []
+        if (item["@type"].includes("RepositoryObject")) {
+            const itemObject = collector.newObject();
+            itemObject.crate.addProfile(languageProfileURI('Object'));
 
-            if (item["@type"].includes("RepositoryObject")) {
-                const itemObject = collector.newObject();
-                itemObject.crate.addProfile(languageProfileURI('Object'));
+            for (let prop of Object.keys(item)) {
+                if (prop === "hasPart") {
+                    for (let f of item.hasPart) {
+                        if (f["@type"] && f["@type"].includes("File")) {
 
-                for (let prop of Object.keys(item)) {
-                    if (prop === "hasPart") {
-                        for (let f of item.hasPart) {
-                            if (f["@type"] && f["@type"].includes("File")) {
-
-                                if (!f["encodingFormat"][1]["@id"]) {
-                                    let fileSF;
-                                    readSiegfried(f, f["@id"], fileSF, siegfriedData, collector.dataDir)
-                                }
-                                await itemObject.addFile(f, collector.templateCrateDir);
-                                filesDealtWith[f["@id"]] = true;
+                            if (!f["encodingFormat"][1]["@id"]) {
+                                let fileSF;
+                                readSiegfried(f, f["@id"], fileSF, siegfriedData, collector.dataDir)
                             }
+                            await itemObject.addFile(f, collector.templateCrateDir);
+                            filesDealtWith[f["@id"]] = true;
                         }
-                    } else if (prop === "memberOf") {
-                        // BAD HACK ---
-                        itemObject.crate.rootDataset.memberOf = item.memberOf.map((m) => { return { "@id": topLevelObject.id } });
-
-                    } else {
-                        itemObject.crate.rootDataset[prop] = item[prop];
                     }
+                } else if (prop === "memberOf") {
+                    // BAD HACK ---
+                    itemObject.crate.rootDataset.memberOf = item.memberOf.map((m) => { return { "@id": topLevelObject.id } });
 
+                } else if (prop === "language") {
+                    for (l in item[prop]) {
+                        const lang = datapack.get({
+                            field: "name",
+                            value: item[prop][l],
+                        });
+                        let Austlang = await getAustlangData(item[prop][l]);
+                        languages = [...Austlang]
+                    }
+                                                          
+                } else {
+                    itemObject.crate.rootDataset[prop] = item[prop];
+                }
+                
+            }
 
+            for (let part of item["@reverse"].partOf) {
+                itemObject.crate.addEntity(part);
+                if (part["@type"] && part["@type"].includes("File")) {
+
+                    if (!part["encodingFormat"]) {
+                        let fileSF;
+                        readSiegfried(part, part["@id"], fileSF, siegfriedData, collector.dataDir)
+                    }
+                    await itemObject.addFile(part, collector.dataDir);
+                    filesDealtWith[part["@id"]] = true;
                 }
 
-                for (let part of item["@reverse"].partOf) {
-                    itemObject.crate.addEntity(part);
-                    if (part["@type"] && part["@type"].includes("File")) {
-                        
-                        if (!part["encodingFormat"]) {
-                            let fileSF;
-                            readSiegfried(part, part["@id"], fileSF, siegfriedData, collector.dataDir)
-                        }
-                        await itemObject.addFile(part, collector.dataDir);
-                        filesDealtWith[part["@id"]] = true;
-                    }
-
-                }
-
-
-                itemObject.mintArcpId("object", item["@id"].replace(/#/g, ""));
-                itemObject.crate.rootDataset["@id"] = itemObject.id;
-                itemObject.crate.rootDataset["@type"] = item["@type"];
-                itemObject.crate.rootDataset["@type"].push("Dataset");
-
-                // WORSE HACK
-                itemObject.crate.rootDataset.memberOf = { "@id": topLevelObject.id }
-
-
-                await itemObject.addToRepo();
-
-            }
-            // Left over parts
-
-        }
-
-        // Copy pros from the template object to our new top level
-        for (let prop of Object.keys(corpusRoot)) {
-            if (prop === "hasPart") {
-
-            } else if (prop === "hasMember") {
-                console.log("Dealing with members")
-                // TODO: Make sure each member knows its a memberOf (in the case where hasMember has been specified at the top level)
-            } else {
-                topLevelObject.crate.rootDataset[prop] = corpusRoot[prop];
-            }
-        }
-        topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
-        console.log("TOP LEVEL ROOT DATASET", topLevelObject.crate.rootDataset["@id"]);
-
-        for (let item of corpusCrate.getGraph()) {
-            if (item["@type"].includes("File") && !filesDealtWith[item["@id"]]) {
-                await topLevelObject.addFile(item, collector.templateCrateDir)
             }
 
 
+            itemObject.mintArcpId("object", item["@id"].replace(/#/g, ""));
+            itemObject.crate.rootDataset["@id"] = itemObject.id;
+            itemObject.crate.rootDataset["@type"] = item["@type"];
+            itemObject.crate.rootDataset["@type"].push("Dataset");
+
+            // WORSE HACK
+            itemObject.crate.rootDataset.memberOf = { "@id": topLevelObject.id }
+            console.log(languages)
+            itemObject.crate.rootDataset.language = languages;
+            await itemObject.addToRepo();
 
         }
-        await topLevelObject.addToRepo();
-        // Now deal with hasParts
+        // Left over parts
+
+    }
+
+    // Copy pros from the template object to our new top level
+    for (let prop of Object.keys(corpusRoot)) {
+        if (prop === "hasPart") {
+
+        } else if (prop === "hasMember") {
+            console.log("Dealing with members")
+            // TODO: Make sure each member knows its a memberOf (in the case where hasMember has been specified at the top level)
+        } else {
+            topLevelObject.crate.rootDataset[prop] = corpusRoot[prop];
+        }
+    }
+    topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
+    console.log("TOP LEVEL ROOT DATASET", topLevelObject.crate.rootDataset["@id"]);
+
+    for (let item of corpusCrate.getGraph()) {
+        if (item["@type"].includes("File") && !filesDealtWith[item["@id"]]) {
+            await topLevelObject.addFile(item, collector.templateCrateDir)
+        }
+
+
+
+    }
+    await topLevelObject.addToRepo();
+    // Now deal with hasParts
 
 
     /*} else {
@@ -233,9 +243,9 @@ function readSiegfried(objFile, fileID, fileSF, siegfriedData, dataDir) {
             console.error("https://github.com/richardlehane/siegfried/wiki/Getting-started");
             process.exit(1);
         }
-        if(typeof sfData!=='undefined'){
-        fileSF = sfData.files[0];
-        siegfriedData[fileID] = sfData;
+        if (typeof sfData !== 'undefined') {
+            fileSF = sfData.files[0];
+            siegfriedData[fileID] = sfData;
         }
     }
     if (!objFile['encodingFormat']) {
@@ -247,6 +257,34 @@ function readSiegfried(objFile, fileID, fileSF, siegfriedData, dataDir) {
         objFile['encodingFormat'].push({ '@id': formatID })
         objFile['extent'] = fileSF.filesize;
     }
+}
+
+async function getAustlangData(term) {
+    console.log(`Searching Austlang for ${term}`);
+    const url = 'https://data.gov.au/data/api/3/action/datastore_search?resource_id=e9a9ea06-d821-4b53-a05f-877409a1a19c&q=';
+    let resp = await fetch(url + term);
+    let itemData = JSON.parse(await resp.text());
+    let langData = itemData.result.records;
+    let langItems = [];
+    for (i of langData) {
+         let langObject = {
+            "@id": i.uri,
+            "@type": "Language",
+            "languageCode": i.language_code,
+            "name": i.language_name,
+            geo: {
+                "@id": `#${i.language_name.replace(/\s/g, "")}`,
+                "@type": "GeoCoordinates",
+                "name": `Geographical coverage for ${i.language_name}`,
+                "geojson": `{"type":"Feature", "properties:{"name":"${i.language_name}","geometry":{"type":"Point","coordinates":["${i.approximate_longitude_of_language_variety}","${i.approximate_latitude_of_language_variety}"]}}`,
+            },
+            source: "Austlang",
+            sameAs: [],
+            alternateName: i.language_synonym.split("|"),
+        }
+        langItems.push(langObject);
+    }
+    return langItems;
 }
 
 main()
