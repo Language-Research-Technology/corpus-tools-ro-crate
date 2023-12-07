@@ -21,7 +21,7 @@
     "fs-extra": "^10.0.0",
     "language-data-commons-vocabs": "github:Language-Research-Technology/language-data-commons-vocabs",
     "ldac-profile": "github:Language-Research-Technology/ldac-profile",
-    "oni-ocfl": "github:Arkisto-Platform/oni-ocfl",
+    "oni-ocfl": "github:Language-Research-Technology/oni-ocfl",
     "path": "^0.12.7"
   }
 }

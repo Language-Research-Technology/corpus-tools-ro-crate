@@ -150,6 +150,7 @@ async function main() {
             }
 
             for (let part of item["@reverse"].partOf) {
+                part = part.toJSON(); // Because it goes in circles (maybe proxy)
                 itemObject.crate.addEntity(part);
                 if (part["@type"] && part["@type"].includes("File")) {
 
@@ -162,7 +163,6 @@ async function main() {
                 }
 
             }
-
 
             itemObject.mintArcpId("object", item["@id"].replace(/#/g, ""));
             itemObject.crate.rootDataset["@id"] = itemObject.id;
@@ -179,6 +179,7 @@ async function main() {
         // Left over parts
 
     }
+    console.log('hello for getGraph')
 
     // Copy pros from the template object to our new top level
     for (let prop of Object.keys(corpusRoot)) {
