@@ -131,7 +131,9 @@ async function main() {
                     // BAD HACK ---
                     itemObject.crate.rootDataset.memberOf = item.memberOf.map((m) => { return { "@id": topLevelObject.id } });
 
-                } else if (prop === "language") {
+                } else if ((prop === "language_code") ||
+                    (prop === "language" && !item.hasOwnProperty("language_code"))) {
+                        // Lookup language data - prefer lanaguage_code info, fallback to language info
                     for (l in item[prop]) {
                         const lang = datapack.get({
                             field: "name",
