@@ -1,0 +1,133 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "@vocab": "http://schema.org/"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "identifier": "ro-crate-metadata.json",
+      "about": {
+        "@id": "arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon"
+      },
+      "conformsTo": {
+        "@id": "https://purl.archive.org/language-data-commons/profile#Object"
+      }
+    },
+    {
+      "@id": "#Giorgia",
+      "@type": "Speaker",
+      "name": "Giorgia",
+      "Pseudonym": "Giorgia",
+      "Ethnicity": "Italian",
+      "AgeGroup": "4_2010sAdults",
+      "Gender": "Female",
+      "Suburb": "Eagle Vale",
+      "Occupation": "Hairdresser",
+      "Occupation_AUSEI06_Label": "Hairdressers",
+      "HighestLevelEducation": "Apprenticeship",
+      "HighschoolType": "State",
+      "SocialClass": "1_WC"
+    },
+    {
+      "@id": "SydS_anon/csv/SydS_IOF_113_Giorgia.csv",
+      "@type": "File",
+      "partOf": {
+        "@id": "arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon"
+      },
+      "annotationOf": {
+        "@id": "SydS_IOF_113_Giorgia.wav"
+      },
+      "encodingFormat": []
+    },
+    {
+      "@id": "SydS_anon/elan/SydS_IOF_113_Giorgia.eaf",
+      "speaker": "Giorgia",
+      "@type": [
+        "File",
+        "Annotation"
+      ],
+      "partOf": {
+        "@id": "arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon"
+      },
+      "annotationOf": {
+        "@id": "SydS_IOF_113_Giorgia.wav"
+      },
+      "encodingFormat": []
+    },
+    {
+      "@id": "SydS_anon/wav/SydS_IOF_113_Giorgia.wav",
+      "@type": [
+        "File",
+        "PrimaryMaterial"
+      ],
+      "partOf": {
+        "@id": "arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon"
+      },
+      "encodingFormat": []
+    },
+    {
+      "@id": "arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon",
+      "@type": [
+        "RepositoryObject",
+        "Dataset"
+      ],
+      "hasPart": [
+        {
+          "@id": "SydS_anon/csv/SydS_IOF_113_Giorgia.csv"
+        },
+        {
+          "@id": "SydS_anon/elan/SydS_IOF_113_Giorgia.eaf"
+        },
+        {
+          "@id": "SydS_anon/wav/SydS_IOF_113_Giorgia.wav"
+        }
+      ],
+      "hasMember": [],
+      "conformsTo": {
+        "@id": "https://purl.archive.org/language-data-commons/profile#Object"
+      },
+      "name": "SydS_IOF_113_Giorgia_anon",
+      "yearOfRecording": "2018",
+      "datePublished": "11/27/2023",
+      "speaker": {
+        "@id": "#Giorgia"
+      },
+      "memberOf": {
+        "@id": "SydS_anon"
+      },
+      "identifier": {
+        "@id": "_:local-id:LDaCA:arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon"
+      }
+    },
+    {
+      "@id": "_:local-id:LDaCA:arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon",
+      "@type": "PropertyValue",
+      "value": "arcp://name,sydney-speaks/SydS_anon/object/SydS_IOF_113_Giorgia_anon",
+      "name": "LDaCA"
+    },
+    {
+      "@id": "git+https://github.com/Arkisto-Platform/oni-ocfl.git",
+      "@type": "SoftwareSourceCode",
+      "name": "git+https://github.com/Arkisto-Platform/oni-ocfl.git",
+      "description": "Oni ocfl tools",
+      "programmingLanguage": {
+        "@id": "https://en.wikipedia.org/wiki/Node.js"
+      }
+    },
+    {
+      "@id": "#provenance",
+      "name": "Created RO-Crate using oni-ocfl",
+      "@type": "CreateAction",
+      "instrument": {
+        "@id": "git+https://github.com/Arkisto-Platform/oni-ocfl.git"
+      },
+      "result": {
+        "@id": "ro-crate-metadata.json"
+      }
+    }
+  ]
+}

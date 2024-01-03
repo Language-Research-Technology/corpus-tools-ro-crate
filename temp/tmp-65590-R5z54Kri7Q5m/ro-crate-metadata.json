@@ -1,0 +1,62 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "@vocab": "http://schema.org/"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "identifier": "ro-crate-metadata.json",
+      "about": {
+        "@id": "arcp://name,sydney-speaks/./SSDS_anon"
+      },
+      "conformsTo": {
+        "@id": "https://purl.archive.org/language-data-commons/profile#Collection"
+      }
+    },
+    {
+      "@id": "arcp://name,sydney-speaks/./SSDS_anon",
+      "@type": "RepositoryCollection",
+      "hasPart": [],
+      "hasMember": [],
+      "conformsTo": {
+        "@id": "https://purl.archive.org/language-data-commons/profile#Collection"
+      },
+      "memberOf": {
+        "@id": "arcp://name,sydney-speaks"
+      },
+      "identifier": {
+        "@id": "_:local-id:LDaCA:arcp://name,sydney-speaks/./SSDS_anon"
+      }
+    },
+    {
+      "@id": "_:local-id:LDaCA:arcp://name,sydney-speaks/./SSDS_anon",
+      "@type": "PropertyValue",
+      "value": "arcp://name,sydney-speaks/./SSDS_anon",
+      "name": "LDaCA"
+    },
+    {
+      "@id": "git+https://github.com/Arkisto-Platform/oni-ocfl.git",
+      "@type": "SoftwareSourceCode",
+      "name": "git+https://github.com/Arkisto-Platform/oni-ocfl.git",
+      "description": "Oni ocfl tools",
+      "programmingLanguage": {
+        "@id": "https://en.wikipedia.org/wiki/Node.js"
+      }
+    },
+    {
+      "@id": "#provenance",
+      "name": "Created RO-Crate using oni-ocfl",
+      "@type": "CreateAction",
+      "instrument": {
+        "@id": "git+https://github.com/Arkisto-Platform/oni-ocfl.git"
+      },
+      "result": {
+        "@id": "ro-crate-metadata.json"
+      }
+    }
+  ]
+}

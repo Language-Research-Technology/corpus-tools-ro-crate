@@ -19,64 +19,34 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-const { Collector, generateArcpId } = require('oni-ocfl');
-const { DataPack } = require('@describo/data-packs');
 const fs = require('fs-extra');
-const { LdacProfile } = require('ldac-profile');
-const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
+const {Collector, generateArcpId} = require('oni-ocfl');
+const {DataPack} = require('@ldac/data-packs');
+const {LdacProfile} = require('ldac-profile');
+
+const {languageProfileURI, Vocab} = require("language-data-commons-vocabs");
+const {getLanguagePack, loadSiegfried} = require("./src/helpers")
+const {storeObject, storeCollection } = require("./src/items")
+
 const shell = require("shelljs");
 const path = require('path');
-const { isArray } = require('lodash');
+
+const {first} = require('lodash');
+
 const PRONOM_URI_BASE = 'https://www.nationalarchives.gov.uk/PRONOM/';
+
+let reRunSiegfied = true; // TODO: put in config
 
 async function main() {
 
     const vocab = new Vocab;
     await vocab.load();
 
-    const datapack = new DataPack({ dataPacks: ['Glottolog'], indexFields: ['name'] });
-    await datapack.load();
-   
-
-    const engLang = datapack.get({
-        field: "name",
-        value: "English",
-    });
-
-    /*engLang = {
-        "@id": "https://glottolog.org/resource/languoid/id/stan1293",
-        "@type": "Language",
-        "languageCode": "stan1293",
-        "name": "English",
-        "geo": {
-            "@id": "#English"
-        },
-        "source": "Glottolog",
-        "sameAs": {
-            "@id": "https://www.ethnologue.com/language/eng"
-        },
-        "alternateName": [
-            "English (Standard Southern British)",
-            "Englisch",
-            "Anglais moderne [fr]",
-            "English [en]",
-            "Inglese moderno [it]",
-            "Inglês moderno [pt]",
-            "Modern English [en]",
-            "Moderna angla lingvo [eo]",
-            "Moderne engelsk [no]",
-            "Modernes Englisch [de]",
-            "Nyengelska [sv]",
-            "anglais [fr]",
-            "თანამედროვე ინგლისური პერიოდი [ka]",
-            "現代英語 [zh]",
-            "近代英語 [ja]"
-        ],
-        "iso639-3": "eng"
-    }*/
+    const languageEntity = await getLanguagePack('English');
 
     const collector = new Collector();
+    const siegfriedFilePath = path.join(collector.dataDir, "siegfriedOutput.json");
+    let siegfriedData = loadSiegfried(collector, reRunSiegfied, siegfriedFilePath);
 
     await collector.connect(); // Make or find the OCFL repo
     // Get a new crate
@@ -88,98 +58,37 @@ async function main() {
 
     //corpusCrate.addContext(vocab.getContext());
     const corpusRoot = corpus.rootDataset;
-    corpusRoot.language = corpusRoot.language || engLang;
+    corpusRoot.language = corpusRoot.language || languageEntity;
     corpusCrate.addProfile(languageProfileURI('Collection'));
     corpusRoot['@type'] = ['Dataset', 'RepositoryCollection'];
-    console.log(corpusRoot["@id"])
-    let siegfriedData = {}
-    let createFile = true;
-    if (fs.existsSync(path.join(collector.dataDir, "siegfriedOutput.json"))) {
-        console.log("Reading SF Data");
-        siegfriedData = JSON.parse(fs.readFileSync(path.join(collector.dataDir, "siegfriedOutput.json")));
-        createFile = false;
-    }
-
-    // TODO ADD SF file stuff if not already there @mark
+    console.log(corpusRoot["@id"]);
 
     //if (collector.opts.multiple) {
-    filesDealtWith = {};
+    let filesDealtWith = {};
+    let itemsDealtWith = [];
     const topLevelObject = collector.newObject(); // Main collection
     topLevelObject.crate.addProfile(languageProfileURI('Collection'));
     topLevelObject.mintArcpId();
 
-    for (let item of corpusCrate.getGraph()) {
-        let languages = []
-        if (item["@type"].includes("RepositoryObject")) {
-            const itemObject = collector.newObject();
-            itemObject.crate.addProfile(languageProfileURI('Object'));
-
-            for (let prop of Object.keys(item)) {
-                if (prop === "hasPart") {
-                    for (let f of item.hasPart) {
-                        if (f["@type"] && f["@type"].includes("File")) {
-
-                            if (!f["encodingFormat"][1]["@id"]) {
-                                let fileSF;
-                                readSiegfried(f, f["@id"], fileSF, siegfriedData, collector.dataDir)
-                            }
-                            await itemObject.addFile(f, collector.templateCrateDir);
-                            filesDealtWith[f["@id"]] = true;
-                        }
-                    }
-                } else if (prop === "memberOf") {
-                    // BAD HACK ---
-                    itemObject.crate.rootDataset.memberOf = item.memberOf.map((m) => { return { "@id": topLevelObject.id } });
-
-                } else if ((prop === "language_code") ||
-                    (prop === "language" && !item.hasOwnProperty("language_code"))) {
-                        // Lookup language data - prefer lanaguage_code info, fallback to language info
-                    for (l in item[prop]) {
-                        const lang = datapack.get({
-                            field: "name",
-                            value: item[prop][l],
-                        });
-                        let Austlang = await getAustlangData(item[prop][l]);
-                        languages = [...Austlang]
-                    }
-                                                          
-                } else {
-                    itemObject.crate.rootDataset[prop] = item[prop];
-                }
-                
+    for(let item of corpusCrate.getGraph()) {
+        let languages = [];
+        if (item["@type"].includes("RepositoryCollection")) {
+            if ((item['@reverse'] && item['@reverse'].about && item['@reverse'].about.find(i => i['@id'] === 'ro-crate-metadata.json'))) {
+                console.log('Do not store already handled');
+            } else {
+                await storeCollection(collector, item, topLevelObject.id, filesDealtWith, siegfriedData, false, itemsDealtWith);
             }
-
-            for (let part of item["@reverse"].partOf) {
-                part = part.toJSON(); // Because it goes in circles (maybe proxy)
-                itemObject.crate.addEntity(part);
-                if (part["@type"] && part["@type"].includes("File")) {
-
-                    if (!part["encodingFormat"]) {
-                        let fileSF;
-                        readSiegfried(part, part["@id"], fileSF, siegfriedData, collector.dataDir)
-                    }
-                    await itemObject.addFile(part, collector.dataDir);
-                    filesDealtWith[part["@id"]] = true;
-                }
-
+        } else if (item["@type"].includes("RepositoryObject")) {
+            // TODO: stop if it has already been processed by a sub-collection
+            let memberOfId;
+            if(item["memberOf"]) {
+                const memberOf = first(item["memberOf"]);
+                memberOfId = memberOf?.['@id'];
+                console.log(memberOfId)
+                await storeObject(collector, item, topLevelObject, filesDealtWith, siegfriedData, true, itemsDealtWith);
             }
-
-            itemObject.mintArcpId("object", item["@id"].replace(/#/g, ""));
-            itemObject.crate.rootDataset["@id"] = itemObject.id;
-            itemObject.crate.rootDataset["@type"] = item["@type"];
-            itemObject.crate.rootDataset["@type"].push("Dataset");
-
-            // WORSE HACK
-            itemObject.crate.rootDataset.memberOf = { "@id": topLevelObject.id }
-            console.log(languages)
-            itemObject.crate.rootDataset.language = languages;
-            await itemObject.addToRepo();
-
         }
-        // Left over parts
-
     }
-    console.log('hello for getGraph')
 
     // Copy pros from the template object to our new top level
     for (let prop of Object.keys(corpusRoot)) {
@@ -193,101 +102,22 @@ async function main() {
         }
     }
     topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
-    console.log("TOP LEVEL ROOT DATASET", topLevelObject.crate.rootDataset["@id"]);
+    console.log("Top Level Root Dataset", topLevelObject.crate.rootDataset["@id"]);
 
+    // Top Level Files
     for (let item of corpusCrate.getGraph()) {
         if (item["@type"].includes("File") && !filesDealtWith[item["@id"]]) {
             await topLevelObject.addFile(item, collector.templateCrateDir)
         }
 
-
-
     }
     await topLevelObject.addToRepo();
-    // Now deal with hasParts
 
-
-    /*} else {
-        corpus.mintArcpId();
-
-        for (let item of corpusCrate.getGraph()) {
-            if (item["@type"].includes("File")) {
-              //  item["memberOf"] = {"@id": corpusRoot["@id"]};
-                let fileSF;
-                readSiegfried(item, item["@id"], fileSF, siegfriedData, collector.dataDir);
-                await corpus.addFile(item, collector.dataDir);
-            }
-        }
-        await corpus.addToRepo();
-
-    }*/
-    // ELSE 
-
-
-
-}
-
-function readSiegfried(objFile, fileID, fileSF, siegfriedData, dataDir) {
-
-    if (siegfriedData[fileID]) {
-        fileSF = siegfriedData[fileIDStore].files[0];
-    } else {
-        let sfData;
-        try {
-            console.log(`Running SF on "${fileID}"`);
-            if (fs.existsSync(path.join(dataDir, fileID))) {
-                sfData = JSON.parse(shell.exec(`sf -nr -json "${path.join(dataDir, fileID)}"`, { silent: true }).stdout);
-            } else {
-                console.log(`Missing file "${path.join(dataDir, fileID)}"`);
-            }
-        } catch (e) {
-            console.error("File identification error: " + e);
-            console.error("Have you installed Siegfried?");
-            console.error("https://github.com/richardlehane/siegfried/wiki/Getting-started");
-            process.exit(1);
-        }
-        if (typeof sfData !== 'undefined') {
-            fileSF = sfData.files[0];
-            siegfriedData[fileID] = sfData;
-        }
-    }
-    if (!objFile['encodingFormat']) {
-        objFile['encodingFormat'] = [];
-    }
-    if (typeof fileSF !== 'undefined') {
-        objFile['encodingFormat'].push(fileSF.matches[0].mime);
-        let formatID = PRONOM_URI_BASE + fileSF.matches[0].id
-        objFile['encodingFormat'].push({ '@id': formatID })
-        objFile['extent'] = fileSF.filesize;
+    if (reRunSiegfied) {
+        console.log(`Writing Siegfried file data to ${siegfriedFilePath}`);
+        fs.writeFileSync(siegfriedFilePath, JSON.stringify(siegfriedData));
     }
 }
 
-async function getAustlangData(term) {
-    console.log(`Searching Austlang for ${term}`);
-    const url = 'https://data.gov.au/data/api/3/action/datastore_search?resource_id=e9a9ea06-d821-4b53-a05f-877409a1a19c&q=';
-    let resp = await fetch(url + term);
-    let itemData = JSON.parse(await resp.text());
-    let langData = itemData.result.records;
-    let langItems = [];
-    for (i of langData) {
-         let langObject = {
-            "@id": i.uri,
-            "@type": "Language",
-            "languageCode": i.language_code,
-            "name": i.language_name,
-            geo: {
-                "@id": `#${i.language_name.replace(/\s/g, "")}`,
-                "@type": "GeoCoordinates",
-                "name": `Geographical coverage for ${i.language_name}`,
-                "geojson": `{"type":"Feature", "properties:{"name":"${i.language_name}","geometry":{"type":"Point","coordinates":["${i.approximate_longitude_of_language_variety}","${i.approximate_latitude_of_language_variety}"]}}`,
-            },
-            source: "Austlang",
-            sameAs: [],
-            alternateName: i.language_synonym.split("|"),
-        }
-        langItems.push(langObject);
-    }
-    return langItems;
-}
 
 main()

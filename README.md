@@ -4,8 +4,7 @@ Generic spreadsheet (and Describo) driven tool for creating an LDaCA-ready profi
 
 ## Assumptions
 
-USers will use describo to describe the Collection and sub collection structure of their data. as per the [Profile]
-
+USers will use crate-o to describe the Collection and sub collection structure of their data. as per the Selected Mode
 
 This tool will allow people to describe RepositoryObjects (eg PARADISEC or Alveo ITEMS)
 
