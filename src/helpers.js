@@ -26,7 +26,7 @@ async function getAustlangData(term) {
 
 function loadSiegfried(collector, reRunSiegfied, siegfriedFilePath) {
     let siegfriedData = {}
-    if (fs.existsSync(siegfriedFilePath) || !reRunSiegfied) {
+    if (fs.existsSync(siegfriedFilePath) && !reRunSiegfied) {
         console.log("Reading Siegfried Data");
         try {
             siegfriedData = JSON.parse(fs.readFileSync(siegfriedFilePath));
@@ -84,9 +84,37 @@ async function getLanguagePack(languageName){
     return lang;
 }
 
+async function search({ query, limit = 10, fields = this.fields }) {
+    let response = await fetch("https://lookups.ldaca.edu.au/data/_search", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "ApiKey bXJWcEVvY0JrZXVEdG93dy14c046YndJOVBLcGFUVk9zQW0xN282NERSQQ==" // Read only api-key
+        },
+        body: JSON.stringify({
+            query: {
+                multi_match: { query, fields }
+            },
+            from: 0,
+            size: limit,
+            sort: []
+        }),
+    });
+    let status = response.status;
+    response = await response.json();
+    console.log(response)
+    if (status !== 200) {
+        return [];
+    }
+    const total = response.hits.total.value;
+    const documents = response.hits.hits.map((doc) => ({ ...doc._source }));
+    return documents;
+}
+
 module.exports = {
     getLanguagePack,
     getAustlangData,
     loadSiegfried,
-    readSiegfried
+    readSiegfried,
+    search
 }
