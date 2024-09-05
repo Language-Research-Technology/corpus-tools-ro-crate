@@ -1,0 +1,22 @@
+{
+    "sydneySpeaks":{
+        "reRunSiegfried":true,
+        "reRunCorpus":true,
+        "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA",
+        "doi":"",
+        "subCollections":{
+            "BCNT":{
+                "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA/BCNT",
+                "reRunSiegfried":true
+            },
+            "SydS":{
+                "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA/SydS",
+                "reRunSiegfried":true
+            },
+            "SSDS":{
+                "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA/SSDS",
+                "reRunSiegfried":true
+            }
+        }
+    }
+}
