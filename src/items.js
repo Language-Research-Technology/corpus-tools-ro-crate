@@ -1,5 +1,5 @@
 const {languageProfileURI} = require("language-data-commons-vocabs");
-const {readSiegfried, loadSiegfried} = require("./helpers")
+const {readSiegfried, loadSiegfried, getAustlangData} = require("./helpers")
 
 async function storeCollection(collector, item, collectionId, filesDealtWith, siegfriedData, isTop, itemsDealtWith) {
     console.log(item['@id']);
@@ -70,17 +70,16 @@ async function storeObject(collector, item, collectionId, filesDealtWith, siegfr
                 }
             } else if (prop === "memberOf") {
                 // BAD HACK ---
-                itemObject.crate.rootDataset.memberOf = item.memberOf.map((m) => {
-                    return {"@id": collectionId}
-                });
+                itemObject.crate.rootDataset.memberOf ={"@id": collectionId}
+                
             } else if ((prop === "language_code") || (prop === "language" && !item.hasOwnProperty("language_code"))) {
                 // Lookup language data - prefer lanaguage_code info, fallback to language info
 
                 for (let l in item[prop]) {
                     // TODO: lang is never used
-                    const lang = datapack.get({
-                        field: "name", value: item[prop][l],
-                    });
+                    // const lang = datapack.get({
+                    //     field: "name", value: item[prop][l],
+                    // });
                     let Austlang = await getAustlangData(item[prop][l]);
                     languages = [...Austlang]
                 }
@@ -101,8 +100,8 @@ async function storeObject(collector, item, collectionId, filesDealtWith, siegfr
                 }
                 await itemObject.addFile(part, collector.dataDir);
                 filesDealtWith[part["@id"]] = true;
+                // TODO: reciprocal hasPart links
             }
-
         }
         if (isTop) {
             itemObject.mintArcpId('object', item["@id"].replace(/#/g, ""));

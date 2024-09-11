@@ -2,6 +2,8 @@ const fs = require("fs-extra");
 const {languageProfileURI} = require("language-data-commons-vocabs");
 const path = require("path");
 const {DataPack} = require("@ldac/data-packs");
+const shell = require("shelljs");
+const PRONOM_URI_BASE = 'https://www.nationalarchives.gov.uk/PRONOM/';
 
 async function getAustlangData(term) {
     console.log(`Searching Austlang for ${term}`);

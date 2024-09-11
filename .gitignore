@@ -109,3 +109,6 @@ package-lock.json
 storage/
 .idea
 ocfl/
+
+# Temporary build dir
+temp

@@ -18,7 +18,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+const {Utils} = require('ro-crate');
 const fs = require('fs-extra');
 const {Collector, generateArcpId} = require('oni-ocfl');
 const {DataPack} = require('@ldac/data-packs');
@@ -76,7 +76,7 @@ async function main() {
             if ((item['@reverse'] && item['@reverse'].about && item['@reverse'].about.find(i => i['@id'] === 'ro-crate-metadata.json'))) {
                 console.log('Do not store already handled');
             } else {
-                await storeCollection(collector, item, topLevelObject.id, filesDealtWith, siegfriedData, false, itemsDealtWith);
+                await storeCollection(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, false, itemsDealtWith);
             }
         } else if (item["@type"].includes("RepositoryObject")) {
             // TODO: stop if it has already been processed by a sub-collection
@@ -84,8 +84,7 @@ async function main() {
             if(item["memberOf"]) {
                 const memberOf = first(item["memberOf"]);
                 memberOfId = memberOf?.['@id'];
-                console.log(memberOfId)
-                await storeObject(collector, item, topLevelObject, filesDealtWith, siegfriedData, true, itemsDealtWith);
+                await storeObject(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, true, itemsDealtWith);
             }
         }
     }
@@ -101,8 +100,8 @@ async function main() {
             topLevelObject.crate.rootDataset[prop] = corpusRoot[prop];
         }
     }
+    
     topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
-    console.log("Top Level Root Dataset", topLevelObject.crate.rootDataset["@id"]);
 
     // Top Level Files
     for (let item of corpusCrate.getGraph()) {
