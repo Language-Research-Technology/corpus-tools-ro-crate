@@ -1,22 +1,33 @@
 {
-    "sydneySpeaks":{
-        "reRunSiegfried":true,
-        "reRunCorpus":true,
-        "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA",
-        "doi":"",
-        "subCollections":{
-            "BCNT":{
-                "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA/BCNT",
-                "reRunSiegfried":true
+    "sydneySpeaks": {
+        "reRunSiegfried": true,
+        "reRunCorpus": true,
+        "path": "/mnt/d/Work_library/SydneySpeaks_for_LDaCA",
+        "doi": "10.25911/m03c-yz22",
+        "atomise": true,
+        "subCollections": {
+            "BCNT": {
+                "path": "/mnt/d/Work_library/SydneySpeaks_for_LDaCA/BCNT",
+                "reRunSiegfried": true
+                
             },
-            "SydS":{
-                "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA/SydS",
-                "reRunSiegfried":true
+            "SydS": {
+                "path": "/mnt/d/Work_library/SydneySpeaks_for_LDaCA/SydS",
+                "reRunSiegfried": true
             },
-            "SSDS":{
-                "path":"/mnt/d/Work_library/SydneySpeaks_for_LDaCA/SSDS",
-                "reRunSiegfried":true
+            "SSDS": {
+                "path": "/mnt/d/Work_library/SydneySpeaks_for_LDaCA/SSDS",
+                "reRunSiegfried": true,
+                "atomise":true
             }
         }
+    },
+    "AusESL": {
+        "reRunSiegfried": true,
+        "reRunCorpus": true,
+        "path": "/mnt/d/Work_library/AuESL",
+        "doi": "10.25911/42ds-nh06",
+        "atomise": true,
+        "subCollections":{}
     }
 }

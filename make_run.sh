@@ -1,6 +1,6 @@
-make BASE_DATA_DIR=/Users/moises/Documents/crateo-data/ss-wolfgang \
-  NAMESPACE=sydney-speaks \
-  CORPUS_NAME=sydney-speaks \
-  BASE_DATA_DIR=/Users/moises/Documents/crateo-data/ss-wolfgang \
-  TEMPLATE_DIR=/Users/moises/Documents/crateo-data/ss-wolfgang \
-  REPO_OUT_DIR=/opt/storage/ss-wolfgang
+make BASE_DATA_DIR=/mnt/d/Work_library/SydneySpeaks_for_LDaCA \
+  NAMESPACE=sydSpeaks \
+  CORPUS_NAME=sydSpeaks \
+  BASE_DATA_DIR=/mnt/d/Work_library/SydneySpeaks_for_LDaCA \
+  TEMPLATE_DIR=/mnt/d/Work_library/SydneySpeaks_for_LDaCA \
+  REPO_OUT_DIR=./opt/storage/oni/ocfl
