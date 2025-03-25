@@ -60,7 +60,7 @@ async function storeObject(collector, item, collectionId, filesDealtWith, siegfr
             if (prop === "hasPart") {
                 for (let f of item.hasPart) {
                     if (f["@type"] && f["@type"].includes("File")) {
-                        if (!f["encodingFormat"][1]["@id"]) {
+                        if (!f["encodingFormat"]?.[1]?.["@id"]) {
                             let fileSF;
                             readSiegfried(siegfriedData, f, f["@id"], fileSF, collector.dataDir)
                         }

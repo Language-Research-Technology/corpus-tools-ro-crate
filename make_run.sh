@@ -1,6 +1,6 @@
-make BASE_DATA_DIR=/Users/bbb/sandbox/nybg \
-  NAMESPACE=nybg \
-  CORPUS_NAME=nybg \
-  BASE_DATA_DIR=/Users/bbb/sandbox/nybg \
-  TEMPLATE_DIR=/Users/bbb/sandbox/nybg \
+make run \
+  NAMESPACE=TEST \
+  CORPUS_NAME=cooee \
+  BASE_DATA_DIR=cooee \
+  TEMPLATE_DIR=cooeee \
   REPO_OUT_DIR=/opt/storage/oni/ocfl

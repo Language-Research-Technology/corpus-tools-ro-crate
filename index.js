@@ -73,23 +73,34 @@ async function main() {
     for(let item of corpusCrate.getGraph()) {
         let languages = [];
         if (item["@type"].includes("RepositoryCollection")) {
+            // TODO - Below expression is doing a lookup to find the root that is not the right way -- also logic looks wront -- FIXME
             if ((item['@reverse'] && item['@reverse'].about && item['@reverse'].about.find(i => i['@id'] === 'ro-crate-metadata.json'))) {
                 console.log('Do not store already handled');
             } else {
                 await storeCollection(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, false, itemsDealtWith);
             }
         } else if (item["@type"].includes("RepositoryObject")) {
+            console.log("Storing object");
             // TODO: stop if it has already been processed by a sub-collection
             let memberOfId;
-            if(item["memberOf"]) {
-                const memberOf = first(item["memberOf"]);
+            if(item["memberOf"] || item["pcdm:memberOf"]) {
+                const memberOf = item["memberOf"]?.[0] || item["pcdm:memberOf"]?.[0];
                 memberOfId = memberOf?.['@id'];
+            } else {
+                // Checking ID
+                memberOfId =  item['@reverse']?.['hasMember']?.[0]?.["@id"];
+            }
+            console.log(memberOfId)
+            if (memberOfId) {
+                item.license = item.license || first(corpusRoot.license);
+
                 await storeObject(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, true, itemsDealtWith);
             }
+
         }
     }
 
-    // Copy pros from the template object to our new top level
+    // Copy props from the template object to our new top level
     for (let prop of Object.keys(corpusRoot)) {
         if (prop === "hasPart") {
 
