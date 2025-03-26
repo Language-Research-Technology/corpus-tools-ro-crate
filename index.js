@@ -72,6 +72,7 @@ async function main() {
 
     for(let item of corpusCrate.getGraph()) {
         let languages = [];
+        console.log(item["@type"]);
         if (item["@type"].includes("RepositoryCollection")) {
             // TODO - Below expression is doing a lookup to find the root that is not the right way -- also logic looks wront -- FIXME
             if ((item['@reverse'] && item['@reverse'].about && item['@reverse'].about.find(i => i['@id'] === 'ro-crate-metadata.json'))) {
@@ -90,7 +91,8 @@ async function main() {
                 // Checking ID
                 memberOfId =  item['@reverse']?.['hasMember']?.[0]?.["@id"];
             }
-            console.log(memberOfId)
+            console.log(memberOfId);
+            
             if (memberOfId) {
                 item.license = item.license || first(corpusRoot.license);
 

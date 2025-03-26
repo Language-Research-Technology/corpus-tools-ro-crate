@@ -48,6 +48,7 @@ async function storeCollection(collector, item, collectionId, filesDealtWith, si
 }
 
 async function storeObject(collector, item, collectionId, filesDealtWith, siegfriedData, isTop, itemsDealtWith) {
+    console.log("Storing item as object", item['@id']);
     if (itemsDealtWith.includes(item['@id'])) {
         console.log('skip');
     } else {
@@ -55,7 +56,6 @@ async function storeObject(collector, item, collectionId, filesDealtWith, siegfr
         const itemObject = collector.newObject();
         let languages;
         itemObject.crate.addProfile(languageProfileURI('Object'));
-
         for (let prop of Object.keys(item)) {
             if (prop === "hasPart") {
                 for (let f of item.hasPart) {
