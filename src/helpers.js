@@ -28,6 +28,7 @@ async function getAustlangData(term) {
 
 function loadSiegfried(collector, reRunSiegfied, siegfriedFilePath) {
     let siegfriedData = {}
+    console.log(fs.existsSync(siegfriedFilePath))
     if (fs.existsSync(siegfriedFilePath) || !reRunSiegfied) {
         console.log("Reading Siegfried Data");
         try {
@@ -40,9 +41,8 @@ function loadSiegfried(collector, reRunSiegfied, siegfriedFilePath) {
     return siegfriedData;
 }
 function readSiegfried(siegfriedData, objFile, fileID, fileSF, dataDir) {
-
     if (siegfriedData[fileID]) {
-        fileSF = siegfriedData[fileIDStore].files[0];
+        fileSF = siegfriedData[fileID].files[0];
     } else {
         let sfData;
         try {

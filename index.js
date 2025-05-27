@@ -18,20 +18,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-const {Utils} = require('ro-crate');
+const { Utils } = require('ro-crate');
 const fs = require('fs-extra');
-const {Collector, generateArcpId} = require('oni-ocfl');
-const {DataPack} = require('@ldac/data-packs');
-const {LdacProfile} = require('ldac-profile');
+const { Collector, generateArcpId } = require('oni-ocfl');
+const { DataPack } = require('@ldac/data-packs');
+// const {LdacProfile} = require('ldac-profile');
 
-const {languageProfileURI, Vocab} = require("language-data-commons-vocabs");
-const {getLanguagePack, loadSiegfried} = require("./src/helpers")
-const {storeObject, storeCollection } = require("./src/items")
+const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
+const { getLanguagePack, loadSiegfried } = require("./src/helpers")
+const { storeObject, storeCollection } = require("./src/items")
 
 const shell = require("shelljs");
 const path = require('path');
 
-const {first} = require('lodash');
+const { first } = require('lodash');
 
 const PRONOM_URI_BASE = 'https://www.nationalarchives.gov.uk/PRONOM/';
 
@@ -56,47 +56,53 @@ async function main() {
 
     const corpusCrate = corpus.crate;
 
-    //corpusCrate.addContext(vocab.getContext());
+    corpusCrate.addContext(vocab.getContext());
     const corpusRoot = corpus.rootDataset;
-    corpusRoot.language = corpusRoot.language || languageEntity;
+    corpusRoot.inLanguage = corpusRoot.inLanguage || corpusRoot.language || languageEntity;
     corpusCrate.addProfile(languageProfileURI('Collection'));
     corpusRoot['@type'] = ['Dataset', 'RepositoryCollection'];
-    console.log(corpusRoot["@id"]);
+    //console.log(corpusRoot["@id"]);
 
     //if (collector.opts.multiple) {
+    // for (c of subCollections) {
     let filesDealtWith = {};
     let itemsDealtWith = [];
     const topLevelObject = collector.newObject(); // Main collection
     topLevelObject.crate.addProfile(languageProfileURI('Collection'));
     topLevelObject.mintArcpId();
 
-    for(let item of corpusCrate.getGraph()) {
+    for (let item of corpusCrate.getGraph()) {
         let languages = [];
-        console.log(item["@type"]);
+        // console.log(item["@type"]);
         if (item["@type"].includes("RepositoryCollection")) {
             // TODO - Below expression is doing a lookup to find the root that is not the right way -- also logic looks wront -- FIXME
             if ((item['@reverse'] && item['@reverse'].about && item['@reverse'].about.find(i => i['@id'] === 'ro-crate-metadata.json'))) {
+                //console.log(item["@id"])
                 console.log('Do not store already handled');
             } else {
-                await storeCollection(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, false, itemsDealtWith);
+                //console.log(item)
+                await storeCollection(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, false, itemsDealtWith, item["@id"].replace("#", ""));
             }
         } else if (item["@type"].includes("RepositoryObject")) {
             console.log("Storing object");
             // TODO: stop if it has already been processed by a sub-collection
             let memberOfId;
-            if(item["memberOf"] || item["pcdm:memberOf"]) {
+            if (item["memberOf"] || item["pcdm:memberOf"]) {
                 const memberOf = item["memberOf"]?.[0] || item["pcdm:memberOf"]?.[0];
                 memberOfId = memberOf?.['@id'];
             } else {
                 // Checking ID
-                memberOfId =  item['@reverse']?.['hasMember']?.[0]?.["@id"];
+                const memberOf = item['@reverse']?.['hasMember']?.[0] || item['@reverse']?.['pcdm:hasMember']?.[0];
+                memberOfId = memberOf?.["@id"];
             }
-            console.log(memberOfId);
-            
-            if (memberOfId) {
-                item.license = item.license || first(corpusRoot.license);
 
-                await storeObject(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, true, itemsDealtWith);
+            if (memberOfId) {
+                console.log("memberOf:", memberOfId)
+                // if (memberOfId !== "arcp://name,sydneyspeaks") {
+                //     process.exit()
+                // }
+                item.license = item.license || first(corpusRoot.license);
+                await storeObject(collector, item, topLevelObject.rootDataset["@id"], filesDealtWith, siegfriedData, true, itemsDealtWith, item["@id"].replace("#", ""));
             }
 
         }
@@ -106,29 +112,33 @@ async function main() {
     for (let prop of Object.keys(corpusRoot)) {
         if (prop === "hasPart") {
 
-        } else if (prop === "hasMember") {
+        } else if (prop === "hasMember"||prop==="pcdm:hasMember") {
             console.log("Dealing with members")
+            console.log(topLevelObject)
             // TODO: Make sure each member knows its a memberOf (in the case where hasMember has been specified at the top level)
         } else {
             topLevelObject.crate.rootDataset[prop] = corpusRoot[prop];
         }
     }
-    
+
     topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
 
     // Top Level Files
+    let files = []
     for (let item of corpusCrate.getGraph()) {
         if (item["@type"].includes("File") && !filesDealtWith[item["@id"]]) {
-            await topLevelObject.addFile(item, collector.templateCrateDir)
+            //await topLevelObject.addFile(item, collector.templateCrateDir)
+            files.push(path.join(collector.dataDir, item["@id"]));
         }
-
     }
+    // console.log(files)
     await topLevelObject.addToRepo();
 
     if (reRunSiegfied) {
         console.log(`Writing Siegfried file data to ${siegfriedFilePath}`);
         fs.writeFileSync(siegfriedFilePath, JSON.stringify(siegfriedData));
     }
+    // }
 }
 
 
