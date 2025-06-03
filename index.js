@@ -3,7 +3,7 @@
 /*
 This is part of the Lanaguge Data Commons tools
 
-(c) The University of Queensland 2023
+(c) The University of Queensland 2025
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,104 +20,91 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 const fs = require('fs-extra');
-const {Collector, generateArcpId} = require('oni-ocfl');
-const {DataPack} = require('@ldac/data-packs');
-const {LdacProfile} = require('ldac-profile');
+const { Collector, generateArcpId } = require('oni-ocfl');
+//const { DataPack } = require('@ldac/data-packs');
 
-const {languageProfileURI, Vocab} = require("language-data-commons-vocabs");
-const {getLanguagePack, loadSiegfried} = require("./src/helpers")
-const {storeObject, storeCollection } = require("./src/items")
+//const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
+const { loadSiegfried } = require("./src/helpers")
+const { path } = require('path');
 
-const shell = require("shelljs");
-const path = require('path');
+let reRunSiegfied = false; // TODO: put in cli arguments
 
-const {first} = require('lodash');
+async function processMembers(collector, members, paths, corpusRoot) {
+  for (const member of members) {
+    // check if it's a collection or object
+    // if conformsTo is empty, set to a default one, which is "https://w3id.org/ldac/profile#Collection/Object"
 
-const PRONOM_URI_BASE = 'https://www.nationalarchives.gov.uk/PRONOM/';
-
-let reRunSiegfied = true; // TODO: put in config
-
-async function main() {
-
-    const vocab = new Vocab;
-    await vocab.load();
-
-    const languageEntity = await getLanguagePack('English');
-
-    const collector = new Collector();
-    const siegfriedFilePath = path.join(collector.dataDir, "siegfriedOutput.json");
-    let siegfriedData = loadSiegfried(collector, reRunSiegfied, siegfriedFilePath);
-
-    await collector.connect(); // Make or find the OCFL repo
-    // Get a new crate
-
-    // This is the main crate - TODO: actually have some data in the template collector.templateCrateDir and add it below.
-    const corpus = collector.newObject(collector.templateCrateDir);
-
-    const corpusCrate = corpus.crate;
-
-    //corpusCrate.addContext(vocab.getContext());
-    const corpusRoot = corpus.rootDataset;
-    corpusRoot.language = corpusRoot.language || languageEntity;
-    corpusCrate.addProfile(languageProfileURI('Collection'));
-    corpusRoot['@type'] = ['Dataset', 'RepositoryCollection'];
-    console.log(corpusRoot["@id"]);
-
-    //if (collector.opts.multiple) {
-    let filesDealtWith = {};
-    let itemsDealtWith = [];
-    const topLevelObject = collector.newObject(); // Main collection
-    topLevelObject.crate.addProfile(languageProfileURI('Collection'));
-    topLevelObject.mintArcpId();
-
-    for(let item of corpusCrate.getGraph()) {
-        let languages = [];
-        if (item["@type"].includes("RepositoryCollection")) {
-            if ((item['@reverse'] && item['@reverse'].about && item['@reverse'].about.find(i => i['@id'] === 'ro-crate-metadata.json'))) {
-                console.log('Do not store already handled');
-            } else {
-                await storeCollection(collector, item, topLevelObject.id, filesDealtWith, siegfriedData, false, itemsDealtWith);
-            }
-        } else if (item["@type"].includes("RepositoryObject")) {
-            // TODO: stop if it has already been processed by a sub-collection
-            let memberOfId;
-            if(item["memberOf"]) {
-                const memberOf = first(item["memberOf"]);
-                memberOfId = memberOf?.['@id'];
-                console.log(memberOfId)
-                await storeObject(collector, item, topLevelObject, filesDealtWith, siegfriedData, true, itemsDealtWith);
-            }
+    const ocflObject = collector.newObject();
+    //ocflObject.mintArcpId(); //depends on the type collection vs object
+    const localPaths = paths.concat();
+    ocflObject.mintArcpId(localPaths, member['@id']);
+    if (member['@type'].includes('RepositoryCollection')) {
+      copyProps(member, ocflObject.crate.root, collector, localPaths, corpusRoot);
+    } else if (member['@type'].includes('RepositoryObject')) {
+      for (const propName in member) {
+        switch (propName) {
+          case 'pcdm:hasMember':
+            break;
+          case 'hasPart':
+          default:
+            ocflObject.crate.root[propName] = member[propName];
         }
+      }
     }
-
-    // Copy pros from the template object to our new top level
-    for (let prop of Object.keys(corpusRoot)) {
-        if (prop === "hasPart") {
-
-        } else if (prop === "hasMember") {
-            console.log("Dealing with members")
-            // TODO: Make sure each member knows its a memberOf (in the case where hasMember has been specified at the top level)
-        } else {
-            topLevelObject.crate.rootDataset[prop] = corpusRoot[prop];
-        }
+    for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
+      ocflObject.crate.root[propName] = ocflObject.crate.root[propName] || corpusRoot[propName];
     }
-    topLevelObject.crate.rootDataset["@id"] = topLevelObject.id;
-    console.log("Top Level Root Dataset", topLevelObject.crate.rootDataset["@id"]);
-
-    // Top Level Files
-    for (let item of corpusCrate.getGraph()) {
-        if (item["@type"].includes("File") && !filesDealtWith[item["@id"]]) {
-            await topLevelObject.addFile(item, collector.templateCrateDir)
-        }
-
-    }
-    await topLevelObject.addToRepo();
-
-    if (reRunSiegfied) {
-        console.log(`Writing Siegfried file data to ${siegfriedFilePath}`);
-        fs.writeFileSync(siegfriedFilePath, JSON.stringify(siegfriedData));
-    }
+    ocflObject.crate.root['@type'].push('Dataset');
+    await ocflObject.addToRepo();
+  }
 }
 
+async function copyProps(source, target, collector, paths = [], corpusRoot) {
+  for (const propName in source) {
+    switch (propName) {
+      case 'pcdm:hasMember':
+        await processMembers(collector, source['pcdm:hasMember'], paths, corpusRoot);
+        break;
+      case 'hasPart':
+        break;
+      default:
+        target[propName] = source[propName];
+    }
+  }
+}
 
-main()
+async function main() {
+  const collector = new Collector();
+  // move siegfried to oni-ocfl with a cli flag
+  //const siegfriedFilePath = path.join(collector.dataDir, "siegfriedOutput.json");
+  //let siegfriedData = loadSiegfried(collector, reRunSiegfied, siegfriedFilePath);
+
+  await collector.connect(); // Make or find the OCFL repo
+  // Get a new crate
+
+  // This is the main crate
+  const corpus = collector.newObject(collector.dataDir);
+  corpus.mintArcpId();
+  const corpusCrate = corpus.crate;
+  const corpusRoot = corpusCrate.root;
+
+  if (collector.opts.multiple) {
+    // For distributed crate, the original crate in `corpus` won't be saved,
+    // it gets broken up into multiple objects and a new top level object is created,
+    // which is a clone of the root data entity in the input crate.
+    const topLevelObject = collector.newObject();
+    topLevelObject.mintArcpId();
+    await copyProps(corpusRoot, topLevelObject.crate.root, collector, [], corpusRoot);
+    //console.log(topLevelObject.crate.root.toJSON());
+    await topLevelObject.addToRepo();
+  } else {
+    await corpus.addToRepo();
+  }
+
+  // if (reRunSiegfied) {
+  //   console.log(`Writing Siegfried file data to ${siegfriedFilePath}`);
+  //   fs.writeFileSync(siegfriedFilePath, JSON.stringify(siegfriedData));
+  // }
+}
+
+main();
