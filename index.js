@@ -24,7 +24,7 @@ const { Collector, generateArcpId } = require('oni-ocfl');
 //const { DataPack } = require('@ldac/data-packs');
 
 //const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
-const { loadSiegfried } = require("./src/helpers")
+//const { loadSiegfried } = require("./src/helpers")
 const { path } = require('path');
 
 let reRunSiegfied = false; // TODO: put in cli arguments
@@ -39,10 +39,22 @@ async function processMembers(collector, members, paths, corpusRoot) {
     const localPaths = paths.concat();
     ocflObject.mintArcpId(localPaths, member['@id']);
     if (member['@type'].includes('RepositoryCollection')) {
-      copyProps(member, ocflObject.crate.root, collector, localPaths, corpusRoot);
+      for (const propName in member) {
+        switch (propName) {
+          case 'pcdm:hasMember':
+            await processMembers(collector, member['pcdm:hasMember'], paths, corpusRoot);
+            break;
+          case 'pcdm:memberOf':
+          case 'hasPart':
+            break;
+          default:
+            ocflObject.crate.root[propName] = member[propName];
+        }
+      }
     } else if (member['@type'].includes('RepositoryObject')) {
       for (const propName in member) {
         switch (propName) {
+          case 'pcdm:memberOf':
           case 'pcdm:hasMember':
             break;
           case 'hasPart':
@@ -55,6 +67,7 @@ async function processMembers(collector, members, paths, corpusRoot) {
       ocflObject.crate.root[propName] = ocflObject.crate.root[propName] || corpusRoot[propName];
     }
     ocflObject.crate.root['@type'].push('Dataset');
+    ocflObject.crate.root['@pcdm:memberOf'] = { '@id': corpusRoot['@id'] };
     await ocflObject.addToRepo();
   }
 }
