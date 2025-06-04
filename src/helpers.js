@@ -1,7 +1,6 @@
 const fs = require("fs-extra");
-const {languageProfileURI} = require("language-data-commons-vocabs");
 const path = require("path");
-const {DataPack} = require("@ldac/data-packs");
+const PRONOM_URI_BASE = 'https://www.nationalarchives.gov.uk/PRONOM/';
 
 async function getAustlangData(term) {
     console.log(`Searching Austlang for ${term}`);
@@ -74,18 +73,7 @@ function readSiegfried(siegfriedData, objFile, fileID, fileSF, dataDir) {
 }
 
 
-async function getLanguagePack(languageName){
-    const datapack = new DataPack({dataPacks: ['Glottolog'], indexFields: ['name']});
-    await datapack.load();
-
-    const lang = datapack.get({
-        field: "name", value: languageName,
-    });
-    return lang;
-}
-
 module.exports = {
-    getLanguagePack,
     getAustlangData,
     loadSiegfried,
     readSiegfried

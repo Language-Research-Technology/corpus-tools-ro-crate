@@ -17,12 +17,12 @@
   },
   "homepage": "https://github.com/Language-Research-Technology/corpus-tools-ro-crate#readme",
   "dependencies": {
-    "@ldac/data-packs": "github:Language-Research-Technology/data-packs",
     "fs-extra": "^10.0.0",
     "language-data-commons-vocabs": "github:Language-Research-Technology/language-data-commons-vocabs",
     "ldac-profile": "github:Language-Research-Technology/ldac-profile",
     "oni-ocfl": "github:Language-Research-Technology/oni-ocfl#v1.7",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "regexp.escape": "^2.0.1"
   },
   "devDependencies": {
     "mocha": "^10.2.0"

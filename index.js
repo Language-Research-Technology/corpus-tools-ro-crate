@@ -24,66 +24,12 @@ const { Collector, generateArcpId } = require('oni-ocfl');
 //const { DataPack } = require('@ldac/data-packs');
 
 //const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
-//const { loadSiegfried } = require("./src/helpers")
 const { path } = require('path');
+const escape = require('regexp.escape');
 
-let reRunSiegfied = false; // TODO: put in cli arguments
-
-async function processMembers(collector, members, paths, corpusRoot) {
-  for (const member of members) {
-    // check if it's a collection or object
-    // if conformsTo is empty, set to a default one, which is "https://w3id.org/ldac/profile#Collection/Object"
-
-    const ocflObject = collector.newObject();
-    //ocflObject.mintArcpId(); //depends on the type collection vs object
-    const localPaths = paths.concat();
-    ocflObject.mintArcpId(localPaths, member['@id']);
-    if (member['@type'].includes('RepositoryCollection')) {
-      for (const propName in member) {
-        switch (propName) {
-          case 'pcdm:hasMember':
-            await processMembers(collector, member['pcdm:hasMember'], paths, corpusRoot);
-            break;
-          case 'pcdm:memberOf':
-          case 'hasPart':
-            break;
-          default:
-            ocflObject.crate.root[propName] = member[propName];
-        }
-      }
-    } else if (member['@type'].includes('RepositoryObject')) {
-      for (const propName in member) {
-        switch (propName) {
-          case 'pcdm:memberOf':
-          case 'pcdm:hasMember':
-            break;
-          case 'hasPart':
-          default:
-            ocflObject.crate.root[propName] = member[propName];
-        }
-      }
-    }
-    for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
-      ocflObject.crate.root[propName] = ocflObject.crate.root[propName] || corpusRoot[propName];
-    }
-    ocflObject.crate.root['@type'].push('Dataset');
-    ocflObject.crate.root['@pcdm:memberOf'] = { '@id': corpusRoot['@id'] };
-    await ocflObject.addToRepo();
-  }
-}
-
-async function copyProps(source, target, collector, paths = [], corpusRoot) {
-  for (const propName in source) {
-    switch (propName) {
-      case 'pcdm:hasMember':
-        await processMembers(collector, source['pcdm:hasMember'], paths, corpusRoot);
-        break;
-      case 'hasPart':
-        break;
-      default:
-        target[propName] = source[propName];
-    }
-  }
+const conformsTo = {
+  RepositoryCollection: { '@id': 'https://w3id.org/ldac/profile#Collection' },
+  RepositoryObject: { '@id': 'https://w3id.org/ldac/profile#Object' }
 }
 
 async function main() {
@@ -100,24 +46,96 @@ async function main() {
   corpus.mintArcpId();
   const corpusCrate = corpus.crate;
   const corpusRoot = corpusCrate.root;
+  const re = new RegExp(`^${escape(corpusRoot['@id'])}/*`);
 
   if (collector.opts.multiple) {
     // For distributed crate, the original crate in `corpus` won't be saved,
     // it gets broken up into multiple objects and a new top level object is created,
     // which is a clone of the root data entity in the input crate.
-    const topLevelObject = collector.newObject();
-    topLevelObject.mintArcpId();
-    await copyProps(corpusRoot, topLevelObject.crate.root, collector, [], corpusRoot);
-    //console.log(topLevelObject.crate.root.toJSON());
-    await topLevelObject.addToRepo();
+
+    // do a BFS traversal and ensure hierarchy first
+    const externalized = new Map();
+    const externalizedTarget = new Map();
+    externalized.set(corpusRoot['@id'], corpusRoot);
+    const queue = [corpusRoot]; // corpusRoot is the top level object
+    let entity;
+    while (entity = queue.shift()) {
+      const members = [].concat(entity['pcdm:hasMember'] || [], entity['@reverse']?.['pcdm:memberOf'] || []);
+      for (const member of members) {
+        if (!externalized.has(member['@id'])) {
+          externalized.set(member['@id'], member);
+          queue.push(member);
+          member['pcdm:memberOf'] = [entity, ...(member['pcdm:memberOf'] || [])];
+        }
+      }
+      corpusCrate.deleteProperty(entity, 'pcdm:hasMember');
+    }
+
+    /** Recursively copy entity only if it is not externalized */
+    function copyEntity(source, target) {
+      for (const propName in source) {
+        if (propName === '@id') {
+          if (!target['@id']) target[propName] = source[propName];
+        } else {
+          target[propName] = source[propName].map(v => {
+            if (v['@id']) {
+              if (externalized.has(v['@id'])) {
+                return { '@id': v['@id'] };
+              } else {
+                return copyEntity(v, {});
+              }
+            } else {
+              return v; // primitive value or non-@id object
+            }
+          });
+        }
+      }
+      return target;
+    }
+
+    // create an ocfl object for each of the externalized entities
+    for (const source of externalized.values()) {
+      const colObj = collector.newObject();
+      const parent = externalized.get(source['pcdm:memberOf']?.[0]?.['@id']);
+      let curPath;
+      if (parent) {
+        if (!source['@id'].startsWith(corpusRoot['@id'] + '/')) {
+          const parentId = parent['@id'].replaceAll('#', '').replace(re, '');
+          const sourceId = source['@id'].replaceAll('#', '');
+          curPath = parentId ? [parentId, sourceId] : sourceId;
+        }
+        // remove hasPart from parent
+        const targetParent = externalizedTarget.get(parent['@id']);
+        if (targetParent) {
+          targetParent.hasPart
+        }
+      }
+      colObj.mintArcpId(curPath);
+      const target = colObj.crate.root;
+      externalizedTarget.set(target['@id'], target);
+
+      console.log(`Processing object: ${target['@id']}`);
+
+      copyEntity(source, target);
+
+      // ensure conformsTo
+      for (const type of target['@type']) {
+        if (conformsTo[type]) {
+          if (!target.conformsTo?.length) {
+            target.conformsTo = conformsTo[type];
+          }
+        }
+      }
+      for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
+        target[propName] = target[propName] || parent?.[propName];
+      }
+      target['@type'].push('Dataset');
+      await colObj.addToRepo();
+    }
   } else {
+    // For single bundled crate, we just add everything to the repo
     await corpus.addToRepo();
   }
-
-  // if (reRunSiegfied) {
-  //   console.log(`Writing Siegfried file data to ${siegfriedFilePath}`);
-  //   fs.writeFileSync(siegfriedFilePath, JSON.stringify(siegfriedData));
-  // }
 }
 
 main();
