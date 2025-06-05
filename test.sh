@@ -13,5 +13,6 @@ node index.js \
 	-d "${DATA_DIR}" \
 	-n ${REPO_NAME} \
 	-s ${NAMESPACE} \
-	--multiple 
- 	#--vm "./node_modules/ro-crate-modes/modes/comprehensive-ldac.json"
+	--multiple \
+	--sf \
+ 	--vm "./node_modules/ro-crate-modes/modes/comprehensive-ldac.json"

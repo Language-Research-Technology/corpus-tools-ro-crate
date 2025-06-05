@@ -28,53 +28,7 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": [
-        {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
-        },
-        {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
-        },
-        {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
-        }
-      ],
+      "inLanguage": [],
       "ldac:subjectLanguage": [
         {
           "@id": [
@@ -133,7 +87,7 @@
           "@id": "Licenses/Example.txt"
         },
         {
-          "@id": "Images/UDHR_OldEnglish.png"
+          "@id": "Images/UDHR_OldEnglish1.png"
         },
         {
           "@id": "Images/UDHR_AncientEgyptian.png"
@@ -221,6 +175,9 @@
       ],
       "conformsTo": {
         "@id": "https://w3id.org/ldac/profile#Collection"
+      },
+      "ldac:hasCollectionProtocol": {
+        "@id": "collection.txt"
       }
     },
     {
@@ -254,7 +211,7 @@
       }
     },
     {
-      "@id": "Images/UDHR_OldEnglish.png",
+      "@id": "Images/UDHR_OldEnglish1.png",
       "@type": [
         "File",
         "ldac:PrimaryMaterial"
@@ -702,9 +659,6 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": {
-        "@id": "#AncientEgyptian"
-      },
       "accountablePerson": {
         "@id": "#Omniglot"
       },
@@ -723,18 +677,6 @@
       },
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
-      },
-      "inLanguage": {
-        "@id": [
-          "#Danish",
-          "#English",
-          "#German",
-          "#Latin",
-          "#Lithuanian",
-          "#OldEnglish",
-          "#ScottishGaelic",
-          "#Welsh"
-        ]
       },
       "accountablePerson": {
         "@id": "#Omniglot"
@@ -781,9 +723,6 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": {
-        "@id": "#Finnish"
-      },
       "accountablePerson": {
         "@id": "#Omniglot"
       },
@@ -803,14 +742,23 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": {
-        "@id": "#Mongolian"
-      },
       "accountablePerson": {
         "@id": "#Omniglot"
       },
       "pcdm:hasMember": {
         "@id": "#UDHR_Mongolian"
+      }
+    },
+    {
+      "@id": "collection.txt",
+      "@type": [
+        "File",
+        "ldac:CollectionProtocol"
+      ],
+      "name": "Collection Notes",
+      "datePublished": "2025-05-28",
+      "author": {
+        "@id": "#LDaCA"
       }
     },
     {
@@ -833,7 +781,7 @@
       },
       "hasPart": [
         {
-          "@id": "Images/UDHR_OldEnglish.png"
+          "@id": "Images/UDHR_OldEnglish1.png"
         },
         {
           "@id": "Text/UDHR_OldEnglish.txt"
@@ -1191,19 +1139,9 @@
       }
     },
     {
-      "@id": "#AncientEgyptian",
-      "@type": "Language",
-      "name": "Ancient Egyptian"
-    },
-    {
-      "@id": "#Finnish",
-      "@type": "Language",
-      "name": "Finnish"
-    },
-    {
-      "@id": "#Mongolian",
-      "@type": "Language",
-      "name": "Mongolian"
+      "@id": "#LDaCA",
+      "@type": "Organization",
+      "name": "Language Data Commons of Australia"
     },
     {
       "@id": "#OldEnglish",
@@ -1215,6 +1153,11 @@
       "@type": "DefinedTermSet",
       "name": "Language Status Terms",
       "description": "The set of expected values forlanguage status."
+    },
+    {
+      "@id": "#AncientEgyptian",
+      "@type": "Language",
+      "name": "Ancient Egyptian"
     },
     {
       "@id": "#Latin",
@@ -1242,6 +1185,11 @@
       "name": "Scottish Gaelic"
     },
     {
+      "@id": "#Mongolian",
+      "@type": "Language",
+      "name": "Mongolian"
+    },
+    {
       "@id": "#Icelandic",
       "@type": "Language",
       "name": "Icelandic"
@@ -1250,6 +1198,11 @@
       "@id": "#Lithuanian",
       "@type": "Language",
       "name": "Lithuanian"
+    },
+    {
+      "@id": "#Finnish",
+      "@type": "Language",
+      "name": "Finnish"
     },
     {
       "@id": "#English",

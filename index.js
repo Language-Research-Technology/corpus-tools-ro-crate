@@ -33,13 +33,7 @@ const conformsTo = {
 }
 
 async function main() {
-  const collector = new Collector();
-  // move siegfried to oni-ocfl with a cli flag
-  //const siegfriedFilePath = path.join(collector.dataDir, "siegfriedOutput.json");
-  //let siegfriedData = loadSiegfried(collector, reRunSiegfied, siegfriedFilePath);
-
-  await collector.connect(); // Make or find the OCFL repo
-  // Get a new crate
+  const collector = await Collector.create();
 
   // This is the main crate
   const corpus = collector.newObject(collector.dataDir);
@@ -53,19 +47,22 @@ async function main() {
     // it gets broken up into multiple objects and a new top level object is created,
     // which is a clone of the root data entity in the input crate.
 
-    // do a BFS traversal and ensure hierarchy first
+    // Do a BFS traversal to ensure hierarchy is encoded in memberOf property and create a list of externalized entities
+    // The choice of using BFS or DFS is arbitrary and will result in a different tree hierarchy if there is a cycle in the input graph
+    // By using either a queue or a stack we can easily change from a BFS (queue) or a DFS (stack)
+    // In contrast to using a recursion which limit us to only DFS because it is a stack based by nature
+    /** A list of entities that need to be put into separate crates or ocfl objects @type {Map<string, object>} */ 
     const externalized = new Map();
-    const externalizedTarget = new Map();
     externalized.set(corpusRoot['@id'], corpusRoot);
-    const queue = [corpusRoot]; // corpusRoot is the top level object
+    const queue = [corpusRoot]; // corpusRoot is the top level object, put it in the queue as the starting point
     let entity;
     while (entity = queue.shift()) {
       const members = [].concat(entity['pcdm:hasMember'] || [], entity['@reverse']?.['pcdm:memberOf'] || []);
       for (const member of members) {
         if (!externalized.has(member['@id'])) {
+          member['pcdm:memberOf'] = [entity, ...(member['pcdm:memberOf'] || [])];
           externalized.set(member['@id'], member);
           queue.push(member);
-          member['pcdm:memberOf'] = [entity, ...(member['pcdm:memberOf'] || [])];
         }
       }
       corpusCrate.deleteProperty(entity, 'pcdm:hasMember');
@@ -76,10 +73,13 @@ async function main() {
       for (const propName in source) {
         if (propName === '@id') {
           if (!target['@id']) target[propName] = source[propName];
+        } else if (propName === 'hasPart' && source['@type'].includes('RepositoryCollection')) {
+          // remove hasPart from any RepositoryCollection
         } else {
           target[propName] = source[propName].map(v => {
             if (v['@id']) {
               if (externalized.has(v['@id'])) {
+                // if the value is an externalized entity, make it into a reference instead
                 return { '@id': v['@id'] };
               } else {
                 return copyEntity(v, {});
@@ -94,9 +94,10 @@ async function main() {
     }
 
     // create an ocfl object for each of the externalized entities
-    for (const source of externalized.values()) {
+    for (const source of Array.from(externalized.values())) {
       const colObj = collector.newObject();
       const parent = externalized.get(source['pcdm:memberOf']?.[0]?.['@id']);
+      // generate iri based on the parent-child hierarchy
       let curPath;
       if (parent) {
         if (!source['@id'].startsWith(corpusRoot['@id'] + '/')) {
@@ -104,15 +105,14 @@ async function main() {
           const sourceId = source['@id'].replaceAll('#', '');
           curPath = parentId ? [parentId, sourceId] : sourceId;
         }
-        // remove hasPart from parent
-        const targetParent = externalizedTarget.get(parent['@id']);
-        if (targetParent) {
-          targetParent.hasPart
-        }
       }
       colObj.mintArcpId(curPath);
       const target = colObj.crate.root;
-      externalizedTarget.set(target['@id'], target);
+
+      // rename id in the source so that all the references is renamed too
+      externalized.delete(source['@id']); // must change the key in the externalized map too
+      externalized.set(target['@id'], source);
+      source['@id'] = target['@id'];
 
       console.log(`Processing object: ${target['@id']}`);
 
@@ -126,10 +126,12 @@ async function main() {
           }
         }
       }
+      // add mandatory properties at the root level
       for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
-        target[propName] = target[propName] || parent?.[propName];
+        target[propName] = source[propName] = target[propName] || parent?.[propName];
       }
       target['@type'].push('Dataset');
+
       await colObj.addToRepo();
     }
   } else {

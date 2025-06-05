@@ -35,53 +35,7 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": [
-        {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
-        },
-        {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
-        },
-        {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
-        }
-      ],
+      "inLanguage": [],
       "ldac:subjectLanguage": [
         {
           "@id": [
@@ -228,6 +182,9 @@
       ],
       "conformsTo": {
         "@id": "https://w3id.org/ldac/profile#Collection"
+      },
+      "ldac:hasCollectionProtocol": {
+        "@id": "collection.txt"
       }
     },
     {
@@ -709,9 +666,6 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": {
-        "@id": "#AncientEgyptian"
-      },
       "accountablePerson": {
         "@id": "#Omniglot"
       },
@@ -730,18 +684,6 @@
       },
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
-      },
-      "inLanguage": {
-        "@id": [
-          "#Danish",
-          "#English",
-          "#German",
-          "#Latin",
-          "#Lithuanian",
-          "#OldEnglish",
-          "#ScottishGaelic",
-          "#Welsh"
-        ]
       },
       "accountablePerson": {
         "@id": "#Omniglot"
@@ -788,9 +730,6 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": {
-        "@id": "#Finnish"
-      },
       "accountablePerson": {
         "@id": "#Omniglot"
       },
@@ -810,14 +749,23 @@
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
       },
-      "inLanguage": {
-        "@id": "#Mongolian"
-      },
       "accountablePerson": {
         "@id": "#Omniglot"
       },
       "pcdm:hasMember": {
         "@id": "#UDHR_Mongolian"
+      }
+    },
+    {
+      "@id": "collection.txt",
+      "@type": [
+        "File",
+        "ldac:CollectionProtocol"
+      ],
+      "name": "Collection Notes",
+      "datePublished": "2025-05-28",
+      "author": {
+        "@id": "#LDaCA"
       }
     },
     {
@@ -1198,19 +1146,9 @@
       }
     },
     {
-      "@id": "#AncientEgyptian",
-      "@type": "Language",
-      "name": "Ancient Egyptian"
-    },
-    {
-      "@id": "#Finnish",
-      "@type": "Language",
-      "name": "Finnish"
-    },
-    {
-      "@id": "#Mongolian",
-      "@type": "Language",
-      "name": "Mongolian"
+      "@id": "#LDaCA",
+      "@type": "Organization",
+      "name": "Language Data Commons of Australia"
     },
     {
       "@id": "#OldEnglish",
@@ -1222,6 +1160,11 @@
       "@type": "DefinedTermSet",
       "name": "Language Status Terms",
       "description": "The set of expected values forlanguage status."
+    },
+    {
+      "@id": "#AncientEgyptian",
+      "@type": "Language",
+      "name": "Ancient Egyptian"
     },
     {
       "@id": "#Latin",
@@ -1249,6 +1192,11 @@
       "name": "Scottish Gaelic"
     },
     {
+      "@id": "#Mongolian",
+      "@type": "Language",
+      "name": "Mongolian"
+    },
+    {
       "@id": "#Icelandic",
       "@type": "Language",
       "name": "Icelandic"
@@ -1257,6 +1205,11 @@
       "@id": "#Lithuanian",
       "@type": "Language",
       "name": "Lithuanian"
+    },
+    {
+      "@id": "#Finnish",
+      "@type": "Language",
+      "name": "Finnish"
     },
     {
       "@id": "#English",
@@ -1371,13 +1324,7 @@ table.table {
             <td style='text-align:left'><a href="#https%3A//creativecommons.org/licenses/by/4.0/">Attribution 4.0 International (CC BY 4.0)</a></td>
             </tr><tr>
             <th style="text-align:left;" class="prop">inLanguage<span>&nbsp;</span><a href="http://schema.org/inLanguage">[?]</a></th>
-            <td style='text-align:left'><ul>
-                        <li>#AncientEgyptian,#Danish,#English,#Finnish,#German,#Latin,#Lithuanian,#Mongolian,#OldEnglish,#ScottishGaelic,#Welsh</li>
-                        
-                        <li>#AncientEgyptian,#Danish,#English,#Finnish,#German,#Latin,#Lithuanian,#Mongolian,#OldEnglish,#ScottishGaelic,#Welsh</li>
-                        
-                        <li>#AncientEgyptian,#Danish,#English,#Finnish,#German,#Latin,#Lithuanian,#Mongolian,#OldEnglish,#ScottishGaelic,#Welsh</li>
-                        </ul></td>
+            <td style='text-align:left'></td>
             </tr><tr>
             <th style="text-align:left;" class="prop">ldac:subjectLanguage<span>&nbsp;</span><a href="https://w3id.org/ldac/terms#subjectLanguage">[?]</a></th>
             <td style='text-align:left'><ul>
@@ -1460,6 +1407,9 @@ table.table {
             </tr><tr>
             <th style="text-align:left;" class="prop">conformsTo<span>&nbsp;</span><a href="http://purl.org/dc/terms/conformsTo">[?]</a></th>
             <td style='text-align:left'><a href="https://w3id.org/ldac/profile#Collection">https://w3id.org/ldac/profile#Collection</a></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">ldac:hasCollectionProtocol<span>&nbsp;</span><a href="https://w3id.org/ldac/terms#hasCollectionProtocol">[?]</a></th>
+            <td style='text-align:left'><a href="#collection.txt">Collection Notes</a></td>
             </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
             <th style="text-align:left;" class="prop">isPartOf<span>&nbsp;</span><a href="http://schema.org/isPartOf">[?]</a></th>
             <td style='text-align:left'><ul>
@@ -1641,7 +1591,7 @@ table.table {
             </table>
         </div>
             </div>
-        <hr/><br/><br/><hr/><br/><br/><hr/><br/><br/><hr/><br/><br/><hr/><br/><br/><hr/><br/><br/><hr/><br/><br/>
+        <hr/><br/><br/><hr/><br/><br/><hr/><br/><br/><hr/><br/><br/>
             <div>
                 <h3><a href="Licenses/Example.txt">⬇️ Download: </a> Example Custom License</h3>
                 
@@ -2720,9 +2670,6 @@ table.table {
             <th style="text-align:left;" class="prop">license<span>&nbsp;</span><a href="http://schema.org/license">[?]</a></th>
             <td style='text-align:left'><a href="#https%3A//creativecommons.org/licenses/by/4.0/">Attribution 4.0 International (CC BY 4.0)</a></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">inLanguage<span>&nbsp;</span><a href="http://schema.org/inLanguage">[?]</a></th>
-            <td style='text-align:left'><a href="#%23AncientEgyptian">Ancient Egyptian</a></td>
-            </tr><tr>
             <th style="text-align:left;" class="prop">accountablePerson<span>&nbsp;</span><a href="http://schema.org/accountablePerson">[?]</a></th>
             <td style='text-align:left'><a href="#%23Omniglot">Omniglot</a></td>
             </tr><tr>
@@ -2769,9 +2716,6 @@ table.table {
             </tr><tr>
             <th style="text-align:left;" class="prop">license<span>&nbsp;</span><a href="http://schema.org/license">[?]</a></th>
             <td style='text-align:left'><a href="#https%3A//creativecommons.org/licenses/by/4.0/">Attribution 4.0 International (CC BY 4.0)</a></td>
-            </tr><tr>
-            <th style="text-align:left;" class="prop">inLanguage<span>&nbsp;</span><a href="http://schema.org/inLanguage">[?]</a></th>
-            <td style='text-align:left'>#Danish,#English,#German,#Latin,#Lithuanian,#OldEnglish,#ScottishGaelic,#Welsh</td>
             </tr><tr>
             <th style="text-align:left;" class="prop">accountablePerson<span>&nbsp;</span><a href="http://schema.org/accountablePerson">[?]</a></th>
             <td style='text-align:left'><a href="#%23Omniglot">Omniglot</a></td>
@@ -2856,9 +2800,6 @@ table.table {
             <th style="text-align:left;" class="prop">license<span>&nbsp;</span><a href="http://schema.org/license">[?]</a></th>
             <td style='text-align:left'><a href="#https%3A//creativecommons.org/licenses/by/4.0/">Attribution 4.0 International (CC BY 4.0)</a></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">inLanguage<span>&nbsp;</span><a href="http://schema.org/inLanguage">[?]</a></th>
-            <td style='text-align:left'><a href="#%23Finnish">Finnish</a></td>
-            </tr><tr>
             <th style="text-align:left;" class="prop">accountablePerson<span>&nbsp;</span><a href="http://schema.org/accountablePerson">[?]</a></th>
             <td style='text-align:left'><a href="#%23Omniglot">Omniglot</a></td>
             </tr><tr>
@@ -2906,9 +2847,6 @@ table.table {
             <th style="text-align:left;" class="prop">license<span>&nbsp;</span><a href="http://schema.org/license">[?]</a></th>
             <td style='text-align:left'><a href="#https%3A//creativecommons.org/licenses/by/4.0/">Attribution 4.0 International (CC BY 4.0)</a></td>
             </tr><tr>
-            <th style="text-align:left;" class="prop">inLanguage<span>&nbsp;</span><a href="http://schema.org/inLanguage">[?]</a></th>
-            <td style='text-align:left'><a href="#%23Mongolian">Mongolian</a></td>
-            </tr><tr>
             <th style="text-align:left;" class="prop">accountablePerson<span>&nbsp;</span><a href="http://schema.org/accountablePerson">[?]</a></th>
             <td style='text-align:left'><a href="#%23Omniglot">Omniglot</a></td>
             </tr><tr>
@@ -2924,7 +2862,43 @@ table.table {
             </table>
         </div>
             </div>
-        <hr/><br/><br/><hr/><br/><br/></div>
+        <hr/><br/><br/><hr/><br/><br/>
+            <div>
+                <h3><a href="collection.txt">⬇️ Download: </a> Collection Notes</h3>
+                
+                <iframe src='collection.txt' width='100%' height='500'></iframe>
+                
+                
+        <div id="collection.txt">
+            
+            <table class="table metadata table-striped" >
+                <tbody><tr>
+            <th style="text-align:left;" class="prop">@id</th>
+            <td style='text-align:left'><span>collection.txt</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">name<span>&nbsp;</span><a href="http://schema.org/name">[?]</a></th>
+            <td style='text-align:left'><span>Collection Notes</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">@type</th>
+            <td style='text-align:left'><ul>
+                        <li><span>File</span></li>
+                        
+                        <li><span>ldac:CollectionProtocol</span></li>
+                        </ul></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">datePublished<span>&nbsp;</span><a href="http://schema.org/datePublished">[?]</a></th>
+            <td style='text-align:left'><span>2025-05-28</span></td>
+            </tr><tr>
+            <th style="text-align:left;" class="prop">author<span>&nbsp;</span><a href="http://schema.org/author">[?]</a></th>
+            <td style='text-align:left'><a href="#%23LDaCA">Language Data Commons of Australia</a></td>
+            </tr><tr><th colspan="2" style="text-align:center">Items that reference this one</th><tr><tr>
+            <th style="text-align:left;" class="prop">ldac:hasCollectionProtocol<span>&nbsp;</span><a href="https://w3id.org/ldac/terms#hasCollectionProtocol">[?]</a></th>
+            <td style='text-align:left'><a href="#UDHR_w_subcollections">Test Dataset: UDHR Translations with SubCollections</a></td>
+            </tr></tbody>
+            </table>
+        </div>
+            </div>
+        <hr/><br/><br/></div>
 </div>
 
 
