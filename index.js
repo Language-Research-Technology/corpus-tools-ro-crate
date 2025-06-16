@@ -55,6 +55,8 @@ async function main() {
         const externalized = new Map();
         externalized.set(corpusRoot['@id'], corpusRoot);
         const queue = [corpusRoot]; // corpusRoot is the top level object, put it in the queue as the starting point
+        let baseLanguage = corpusRoot.inLanguage;
+        let baseLicense = corpusRoot.license;
         let entity;
         while (entity = queue.shift()) {
             const members = [].concat(entity['pcdm:hasMember'] || [], entity['@reverse']?.['pcdm:memberOf'] || []);
@@ -129,8 +131,9 @@ async function main() {
                 }
             }
             // add mandatory properties at the root level
-            for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
-                target[propName] = source[propName] = target[propName] || parent?.[propName];
+            
+            for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher', 'inLanguage', 'license']) {
+                target[propName] = source[propName] = target[propName] || (parent?.[propName]||corpusRoot?.[propName]);
             }
             target['@type'].push('Dataset');
             //cleanup dodgy dates
@@ -144,7 +147,15 @@ async function main() {
                     target[propName] = [newDate];
                 }
             }
-
+            // if(!target.inLanguage || target.inLanguage.length === 0) {
+            //     // If the inLanguage is not set, use the base language from the corpus root
+            //     target.inLanguage = baseLanguage;
+            // }
+            // if(!target.license || target.license.length === 0) {
+            //     // If the license is not set, use the base license from the corpus root
+            //     target.license = baseLicense;
+            // }
+            
             await colObj.addToRepo();
         }
     } else {
