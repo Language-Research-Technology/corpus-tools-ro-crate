@@ -55,8 +55,6 @@ async function main() {
         const externalized = new Map();
         externalized.set(corpusRoot['@id'], corpusRoot);
         const queue = [corpusRoot]; // corpusRoot is the top level object, put it in the queue as the starting point
-        let baseLanguage = corpusRoot.inLanguage;
-        let baseLicense = corpusRoot.license;
         let entity;
         while (entity = queue.shift()) {
             const members = [].concat(entity['pcdm:hasMember'] || [], entity['@reverse']?.['pcdm:memberOf'] || []);
@@ -80,6 +78,7 @@ async function main() {
                 } else if (propName === 'hasPart' && source['@type'].includes('RepositoryCollection')) {
                     // remove hasPart from any RepositoryCollection
                 } else {
+
                     target[propName] = source[propName].map(v => {
                         if (v['@id']) {
                             if (externalized.has(v['@id'])) {
@@ -87,10 +86,12 @@ async function main() {
                                 return { '@id': v['@id'] };
                             } else if(!processedEntities.includes(v["@id"])){
                                     return copyEntity(v, {});
+                            } else{
+                                return v; // already processed entity, just return the id
                             }
                         } else {
                             return v; // primitive value or non-@id object
-                        }
+                        }                        
                     });
                 }
             }
@@ -112,13 +113,13 @@ async function main() {
             }
             colObj.mintArcpId(curPath);
             const target = colObj.crate.root;
+            
+            console.log(`Processing object: ${target['@id']}`);
 
             // rename id in the source so that all the references is renamed too
             externalized.delete(source['@id']); // must change the key in the externalized map too
             externalized.set(target['@id'], source);
             source['@id'] = target['@id'];
-
-            console.log(`Processing object: ${target['@id']}`);
 
             copyEntity(source, target);
 
@@ -131,10 +132,26 @@ async function main() {
                 }
             }
             // add mandatory properties at the root level
-            
-            for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher', 'inLanguage', 'license']) {
-                target[propName] = source[propName] = target[propName] || (parent?.[propName]||corpusRoot?.[propName]);
+            let compulsories = {
+                'dct:rightsHolder': corpusRoot['dct:rightsHolder'],
+                'author': corpusRoot['author'],
+                'accountablePerson': corpusRoot['accountablePerson'],
+                'publisher': corpusRoot['publisher'],
+                'inLanguage': corpusRoot['inLanguage'],
+                'license': corpusRoot['license']
             }
+            
+            for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
+                target[propName] = source[propName] = target[propName] || parent?.[propName];
+                if(target[propName].length === 0 && propName==="accountablePerson") {
+                    console.log(target[propName])
+                    console.warn(`Property ${propName} is missing in ${target['@id']}`);
+                    console.log(corpusRoot[propName]);
+                    process.exit()
+                }
+            }
+            
+
             target['@type'].push('Dataset');
             //cleanup dodgy dates
             for (const propName of ["datePublished"]) {
@@ -147,14 +164,7 @@ async function main() {
                     target[propName] = [newDate];
                 }
             }
-            // if(!target.inLanguage || target.inLanguage.length === 0) {
-            //     // If the inLanguage is not set, use the base language from the corpus root
-            //     target.inLanguage = baseLanguage;
-            // }
-            // if(!target.license || target.license.length === 0) {
-            //     // If the license is not set, use the base license from the corpus root
-            //     target.license = baseLicense;
-            // }
+
             
             await colObj.addToRepo();
         }
