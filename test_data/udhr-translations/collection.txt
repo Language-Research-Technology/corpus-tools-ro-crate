@@ -1,0 +1,3 @@
+The test data is a collection of translations of Article 1 of the Universal Declaration of Human Rights, provided by Omniglot. 
+The original folder structure is in the format `oot_directory/file_type, e.g. W_SubCollections/Audio. 
+In the metadata spreadsheet, the collection is instead structured by language family sub-collections and language objects, e.g. #Indo-European and #UDHR_Danish.
