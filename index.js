@@ -26,6 +26,7 @@ const { Collector, generateArcpId } = require('oni-ocfl');
 //const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
 const { path } = require('path');
 const escape = require('regexp.escape');
+const { arrayBuffer } = require('stream/consumers');
 
 const conformsTo = {
     RepositoryCollection: { '@id': 'https://w3id.org/ldac/profile#Collection' },
@@ -81,17 +82,22 @@ async function main() {
 
                     target[propName] = source[propName].map(v => {
                         if (v['@id']) {
+                            if (v['@id'].startsWith("#")) {
+                                let parentObj = externalized.get(source['pcdm:memberOf']?.[0]?.['@id']);
+                                v["@id"] = generateArcpId(parentObj["@id"].replace("arcp://name,", ""), propName.toLowerCase().replace(/.+:/, ""), v["@id"].replace("#", ""));
+                            }
                             if (externalized.has(v['@id'])) {
                                 // if the value is an externalized entity, make it into a reference instead
                                 return { '@id': v['@id'] };
-                            } else if(!processedEntities.includes(v["@id"])){
-                                    return copyEntity(v, {});
-                            } else{
-                                return v; // already processed entity, just return the id
+                            } else if (!processedEntities.includes(v["@id"])) {
+                                return copyEntity(v, {});
+                            } else {
+                                return v; // object that is not an externalized entity
                             }
                         } else {
+
                             return v; // primitive value or non-@id object
-                        }                        
+                        }
                     });
                 }
             }
@@ -113,7 +119,7 @@ async function main() {
             }
             colObj.mintArcpId(curPath);
             const target = colObj.crate.root;
-            
+
             console.log(`Processing object: ${target['@id']}`);
 
             // rename id in the source so that all the references is renamed too
@@ -132,25 +138,12 @@ async function main() {
                 }
             }
             // add mandatory properties at the root level
-            let compulsories = {
-                'dct:rightsHolder': corpusRoot['dct:rightsHolder'],
-                'author': corpusRoot['author'],
-                'accountablePerson': corpusRoot['accountablePerson'],
-                'publisher': corpusRoot['publisher'],
-                'inLanguage': corpusRoot['inLanguage'],
-                'license': corpusRoot['license']
-            }
-            
+
             for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
                 target[propName] = source[propName] = target[propName] || parent?.[propName];
-                if(target[propName].length === 0 && propName==="accountablePerson") {
-                    console.log(target[propName])
-                    console.warn(`Property ${propName} is missing in ${target['@id']}`);
-                    console.log(corpusRoot[propName]);
-                    process.exit()
-                }
+
             }
-            
+
 
             target['@type'].push('Dataset');
             //cleanup dodgy dates
@@ -165,7 +158,7 @@ async function main() {
                 }
             }
 
-            
+
             await colObj.addToRepo();
         }
     } else {
