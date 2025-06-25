@@ -26,7 +26,7 @@ const { Collector, generateArcpId } = require('oni-ocfl');
 //const { languageProfileURI, Vocab } = require("language-data-commons-vocabs");
 const { path } = require('path');
 const escape = require('regexp.escape');
-const { arrayBuffer } = require('stream/consumers');
+const { arrayBuffer, json } = require('stream/consumers');
 
 const conformsTo = {
     RepositoryCollection: { '@id': 'https://w3id.org/ldac/profile#Collection' },
@@ -36,12 +36,20 @@ const conformsTo = {
 async function main() {
     const collector = await Collector.create();
 
-    // This is the main crate
+    // This is the main cratef
     const corpus = collector.newObject(collector.dataDir);
     corpus.mintArcpId();
     const corpusCrate = corpus.crate;
     const corpusRoot = corpusCrate.root;
     const re = new RegExp(`^${escape(corpusRoot['@id'])}/*`);
+    const rootLicense = corpusRoot['license'][0]["@id"];
+    let rootLicenseContent = corpusCrate.getEntity(rootLicense);
+    if(rootLicenseContent["@type"].includes("DataReuseLicense")){
+        rootLicenseContent["@type"] = ["ldac:DataReuseLicense"];
+        corpusCrate.updateEntity(rootLicense, rootLicenseContent);
+    }
+    // console.log(rootLicenseContent);
+    // process.exit()
 
     if (collector.opts.multiple) {
         // For distributed crate, the original crate in `corpus` won't be saved,
@@ -74,6 +82,7 @@ async function main() {
         function copyEntity(source, target) {
             processedEntities.push(source["@id"]);
             for (const propName in source) {
+                
                 if (propName === '@id') {
                     if (!target['@id']) target[propName] = source[propName];
                 } else if (propName === 'hasPart' && source['@type'].includes('RepositoryCollection')) {
@@ -95,7 +104,6 @@ async function main() {
                                 return v; // object that is not an externalized entity
                             }
                         } else {
-
                             return v; // primitive value or non-@id object
                         }
                     });
@@ -141,9 +149,7 @@ async function main() {
 
             for (const propName of ['dct:rightsHolder', 'author', 'accountablePerson', 'publisher']) {
                 target[propName] = source[propName] = target[propName] || parent?.[propName];
-
             }
-
 
             target['@type'].push('Dataset');
             //cleanup dodgy dates
