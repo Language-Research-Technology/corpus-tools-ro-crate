@@ -1,5 +1,7 @@
 const assert = require("assert");
 const {Collector} = require('oni-ocfl');
+const path = require('path');
+const rimraf = require('rimraf');
 
 const basePath = 'test-data/sydney-speaks';
 const repoPath = path.join(basePath, 'ocfl');
@@ -12,7 +14,7 @@ let corpusCrateRootId;
 let repository;
 describe("Create OCFL Repo", function () {
 
-    beforeAll(function () {
+    before(function () {
         rimraf.sync(repoPath);
         console.log(`${repoPath} deleted`);
     })
