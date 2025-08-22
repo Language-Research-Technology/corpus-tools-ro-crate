@@ -1,5 +1,6 @@
 const assert = require("assert");
 const {Collector} = require('oni-ocfl');
+Collector.mainPackage = require('../package.json');
 const path = require('path');
 const rimraf = require('rimraf');
 
