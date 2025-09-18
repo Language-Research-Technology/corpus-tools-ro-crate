@@ -92,10 +92,7 @@ async function main() {
                     target[propName] = source[propName].map(v => {
                         if (v['@id']) {
                             if (v['@id'].startsWith("#")) {
-                                // let parentObj = externalized.get(source['pcdm:memberOf']?.[0]?.['@id']);
-                                // const parentId = parentObj?.["@id"]?.replace("arcp://name,", "") || "XXX";
-                                // v["@id"] = generateArcpId(parentId, propName.toLowerCase().replace(/.+:/, ""), v["@id"].replace("#", ""));
-                                v["@id"] = corpusRoot['@id'] + "/" + v["@id"];
+                                v["@id"] = `${corpusRoot["@id"]}/${propName.toLowerCase().replace(/.+:/, "")}/${v["@id"].replace("#", "")}`;
                             }
                             if (externalized.has(v['@id'])) {
                                 // if the value is an externalized entity, make it into a reference instead
