@@ -43,13 +43,14 @@ async function main() {
     const corpusRoot = corpusCrate.root;
     const re = new RegExp(`^${escape(corpusRoot['@id'])}/*`);
     const rootLicense = corpusRoot['license'][0]["@id"];
+
     let rootLicenseContent = corpusCrate.getEntity(rootLicense);
-    if(rootLicenseContent["@type"].includes("DataReuseLicense")){
+    if (rootLicenseContent["@type"].includes("DataReuseLicense")) {
         rootLicenseContent["@type"] = ["ldac:DataReuseLicense"];
         corpusCrate.updateEntity(rootLicense, rootLicenseContent);
     }
-    // console.log(rootLicenseContent);
-    // process.exit()
+    let metadataEntity = corpusCrate.getEntity("ro-crate-metadata.json");
+    const metadataLicense = metadataEntity.license?.[0]?.["@id"];
 
     if (collector.opts.multiple) {
         // For distributed crate, the original crate in `corpus` won't be saved,
@@ -82,13 +83,12 @@ async function main() {
         function copyEntity(source, target) {
             processedEntities.push(source["@id"]);
             for (const propName in source) {
-                
+
                 if (propName === '@id') {
                     if (!target['@id']) target[propName] = source[propName];
                 } else if (propName === 'hasPart' && source['@type'].includes('RepositoryCollection')) {
                     // remove hasPart from any RepositoryCollection
                 } else {
-
                     target[propName] = source[propName].map(v => {
                         if (v['@id']) {
                             if (v['@id'].startsWith("#")) {
@@ -114,7 +114,15 @@ async function main() {
         // create an ocfl object for each of the externalized entities
         for (const source of Array.from(externalized.values())) {
             const colObj = collector.newObject();
+            if (metadataLicense !== 'undefined') {
+                console.log("add metadata license")
+                const localMetadata = colObj.crate.getEntity("ro-crate-metadata.json");
+                localMetadata.license = { "@id": metadataLicense };
+                colObj.crate.updateEntity("ro-crate-metadata.json", localMetadata);
+            }
+            
             const parent = externalized.get(source['pcdm:memberOf']?.[0]?.['@id']);
+
             // generate iri based on the parent-child hierarchy
             let curPath;
             if (parent) {
