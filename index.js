@@ -50,7 +50,7 @@ async function main() {
         corpusCrate.updateEntity(rootLicense, rootLicenseContent);
     }
     let metadataEntity = corpusCrate.getEntity("ro-crate-metadata.json");
-    const metadataLicense = metadataEntity.license?.[0]?.["@id"];
+    const metadataLicense = corpusCrate.getEntity(metadataEntity.license?.[0]?.["@id"]);
 
     if (collector.opts.multiple) {
         // For distributed crate, the original crate in `corpus` won't be saved,
@@ -117,7 +117,7 @@ async function main() {
             if (metadataLicense !== 'undefined') {
                 console.log("add metadata license")
                 const localMetadata = colObj.crate.getEntity("ro-crate-metadata.json");
-                localMetadata.license = { "@id": metadataLicense };
+                localMetadata.license = metadataLicense;
                 colObj.crate.updateEntity("ro-crate-metadata.json", localMetadata);
             }
             
