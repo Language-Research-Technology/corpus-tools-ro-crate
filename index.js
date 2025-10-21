@@ -81,6 +81,7 @@ async function main() {
 
         /** Recursively copy entity only if it is not externalized */
         function copyEntity(source, target) {
+
             processedEntities.push(source["@id"]);
             for (const propName in source) {
 
@@ -91,11 +92,12 @@ async function main() {
                 } else {
                     target[propName] = source[propName].map(v => {
                         if (v['@id']) {
+                            console.log(propName, v['@id'])
                             if (v['@id'].startsWith("#")) {
                                 v["@id"] = `${corpusRoot["@id"]}/${propName.toLowerCase().replace(/.+:/, "")}/${v["@id"].replace("#", "")}`;
                             }
                             if (externalized.has(v['@id'])) {
-                                // if the value is an externalized entity, make it into a reference instead
+                                // if the value is an externalized or link is an isPartOf entity, make it into a reference instead
                                 return { '@id': v['@id'] };
                             } else if (!processedEntities.includes(v["@id"])) {
                                 return copyEntity(v, {});
@@ -120,7 +122,7 @@ async function main() {
                 localMetadata.license = metadataLicense;
                 colObj.crate.updateEntity("ro-crate-metadata.json", localMetadata);
             }
-            
+
             const parent = externalized.get(source['pcdm:memberOf']?.[0]?.['@id']);
 
             // generate iri based on the parent-child hierarchy

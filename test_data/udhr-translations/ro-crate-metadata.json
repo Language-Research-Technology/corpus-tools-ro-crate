@@ -9,7 +9,7 @@
   ],
   "@graph": [
     {
-      "@id": "UDHR_w_subcollections",
+      "@id": "./",
       "@type": [
         "Dataset",
         "RepositoryCollection"
@@ -31,49 +31,37 @@
       "inLanguage": [],
       "ldac:subjectLanguage": [
         {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
+          "@id": "#AncientEgyptian"
         },
         {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
+          "@id": "#Danish"
         },
         {
-          "@id": [
-            "#AncientEgyptian",
-            "#Danish",
-            "#English",
-            "#Finnish",
-            "#German",
-            "#Latin",
-            "#Lithuanian",
-            "#Mongolian",
-            "#OldEnglish",
-            "#ScottishGaelic",
-            "#Welsh"
-          ]
+          "@id": "#English"
+        },
+        {
+          "@id": "#Finnish"
+        },
+        {
+          "@id": "#German"
+        },
+        {
+          "@id": "#Latin"
+        },
+        {
+          "@id": "#Lithuanian"
+        },
+        {
+          "@id": "#Mongolian"
+        },
+        {
+          "@id": "#OldEnglish"
+        },
+        {
+          "@id": "#ScottishGaelic"
+        },
+        {
+          "@id": "#Welsh"
         }
       ],
       "dct:rightsHolder": {
@@ -207,7 +195,7 @@
       "description": "This license explains who is allowed to use and possibly redistribute this data, and for what purpose.",
       "ldac:allowTextIndex": "true",
       "isPartOf": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       }
     },
     {
@@ -221,7 +209,7 @@
           "@id": "#UDHR_OldEnglish"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -239,7 +227,7 @@
           "@id": "#UDHR_AncientEgyptian"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -257,7 +245,7 @@
           "@id": "#UDHR_Latin"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -278,7 +266,7 @@
           "@id": "#UDHR_German"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -299,7 +287,7 @@
           "@id": "#UDHR_Danish"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -320,7 +308,7 @@
           "@id": "#UDHR_Welsh"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -341,7 +329,7 @@
           "@id": "#UDHR_ScottishGaelic"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -362,7 +350,7 @@
           "@id": "#UDHR_Mongolian"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -383,7 +371,7 @@
           "@id": "#UDHR_Icelandic"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -404,7 +392,7 @@
           "@id": "#UDHR_Lithuanian"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -425,7 +413,7 @@
           "@id": "#UDHR_Finnish"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "ldac:speaker": {
@@ -446,7 +434,7 @@
           "@id": "#UDHR_Icelandic"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -464,7 +452,7 @@
           "@id": "#UDHR_OldEnglish"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -482,7 +470,7 @@
           "@id": "#UDHR_ScottishGaelic"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -500,7 +488,7 @@
           "@id": "#UDHR_Latin"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -518,7 +506,7 @@
           "@id": "#UDHR_Mongolian"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -536,7 +524,7 @@
           "@id": "#UDHR_Finnish"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -554,7 +542,7 @@
           "@id": "#UDHR_English"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -572,7 +560,7 @@
           "@id": "#UDHR_Welsh"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -590,7 +578,7 @@
           "@id": "#UDHR_German"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -608,7 +596,7 @@
           "@id": "#UDHR_Lithuanian"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -626,7 +614,7 @@
           "@id": "#UDHR_Danish"
         },
         {
-          "@id": "UDHR_w_subcollections"
+          "@id": "./"
         }
       ],
       "arcp://name,custom/terms#languageStatus": {
@@ -637,14 +625,14 @@
       "@id": "ro-crate-metadata-w-subcollections2.xlsx",
       "@type": "File",
       "isPartOf": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       }
     },
     {
       "@id": "ro-crate-preview.html",
       "@type": "File",
       "isPartOf": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       }
     },
     {
@@ -654,7 +642,7 @@
       "description": "Afro-Asiatic languages.",
       "datePublished": "2025-05-28",
       "pcdm:memberOf": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       },
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
@@ -673,7 +661,7 @@
       "description": "Indo-European languages.",
       "datePublished": "2025-05-28",
       "pcdm:memberOf": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       },
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
@@ -718,7 +706,7 @@
       "description": "Uralic languages.",
       "datePublished": "2025-05-28",
       "pcdm:memberOf": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       },
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
@@ -737,7 +725,7 @@
       "description": "Mongolic languages.",
       "datePublished": "2025-05-28",
       "pcdm:memberOf": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       },
       "license": {
         "@id": "https://creativecommons.org/licenses/by/4.0/"
@@ -1214,7 +1202,7 @@
       "@type": "CreativeWork",
       "identifier": "ro-crate-metadata.json",
       "about": {
-        "@id": "UDHR_w_subcollections"
+        "@id": "./"
       }
     },
     {
