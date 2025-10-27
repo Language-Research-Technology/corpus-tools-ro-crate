@@ -91,7 +91,7 @@ async function main() {
                     // remove hasPart from any RepositoryCollection
                 } else {
                     target[propName] = source[propName].map(v => {
-                        if (v['@id']) {
+                        if (v['@id'] && !Array.isArray(v['@id'])) {
                             console.log(propName, v['@id'])
                             if (v['@id'].startsWith("#")) {
                                 v["@id"] = `${corpusRoot["@id"]}/${propName.toLowerCase().replace(/.+:/, "")}/${v["@id"].replace("#", "")}`;
