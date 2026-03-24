@@ -109,3 +109,5 @@ package-lock.json
 storage/
 .idea
 ocfl/
+ocfl-repo
+temp

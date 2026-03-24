@@ -23,7 +23,7 @@ node index.js \
 	-r "${REPO_OUT_DIR}" \
 	-d "${DATA_DIR}" \
 	-s "${NAMESPACE}" \
-	--multiple \
+	--distributed \
 	--sf \
  	--vm "${MODEFILE}"
 ```
@@ -37,9 +37,9 @@ Specify the input directory `${DATA_DIR}`, which is the path to the RO-Crate dir
 ### -s "${NAMESPACE}"
 `${NAMESPACE}` is a name for the top-level collection which must be unique to the repository. This is used to create an ARCP identifier `arcp://name,<namespace>` to make the `@id` of the Root Data Entity into a valid absolute IRI.
 
-### --multiple
+### --distributed
 
-If `--multiple` is specified, a distributed crate will be created. The input crate will be split to output multiple crates. Each RepositoryObject and RepositoryCollection in the input crate will be put into its own OCFL storage object.
+If `--distributed` is specified, a distributed crate will be created. The input crate will be split to output multiple crates. Each RepositoryObject and RepositoryCollection in the input crate will be put into each own OCFL storage object.
 
 ### --sf
 Using `--sf` flag requires [Siegfried](https://github.com/richardlehane/siegfried) to be installed. It will run it and cache the output to `.siegfried.json`.

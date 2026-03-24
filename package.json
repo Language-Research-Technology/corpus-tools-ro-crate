@@ -1,10 +1,21 @@
 {
   "name": "corpus-tools-ro-crate",
-  "version": "1.0.0",
-  "description": "Converts RO-Crate to OCFL",
-  "main": "index.js",
+  "version": "1.1.0",
+  "description": "Converts RO-Crate to OCFL - library and CLI tool",
+  "main": "lib/index.js",
+  "type": "module",
+  "bin": {
+    "corpus-tools-ro-crate": "index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./dist/cjs/lib/index.cjs"
+    }
+  },
   "scripts": {
-    "test": "mocha"
+    "build:cjs": "node scripts/build-cjs.cjs",
+    "test": "mocha \"test/**/*.spec.js\""
   },
   "repository": {
     "type": "git",
@@ -16,13 +27,21 @@
     "url": "https://github.com/Language-Research-Technology/corpus-tools-ro-crate/issues"
   },
   "homepage": "https://github.com/Language-Research-Technology/corpus-tools-ro-crate#readme",
+  "keywords": [
+    "ro-crate",
+    "ocfl",
+    "research-object",
+    "corpus",
+    "metadata"
+  ],
   "dependencies": {
     "fs-extra": "^10.0.0",
     "language-data-commons-vocabs": "github:Language-Research-Technology/language-data-commons-vocabs",
     "ldac-profile": "github:Language-Research-Technology/ldac-profile",
     "oni-ocfl": "github:Language-Research-Technology/oni-ocfl#v1.7",
     "path": "^0.12.7",
-    "regexp.escape": "^2.0.1"
+    "regexp.escape": "^2.0.1",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "mocha": "^10.2.0"
