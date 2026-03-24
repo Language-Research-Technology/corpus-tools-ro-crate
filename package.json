@@ -15,7 +15,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:cjs": "node scripts/build-cjs.cjs"
+    "build:cjs": "node scripts/build-cjs.cjs",
+    "test": "mocha --require esm --recursive test"
   },
   "repository": {
     "type": "git",
