@@ -26,7 +26,7 @@ import { convertRoCrateToOcfl } from './lib/index.js';
  */
 async function cli() {
     const yargs = (await import('yargs')).default;
-    
+
     const argv = yargs
         .option('r', {
             alias: 'repo',
