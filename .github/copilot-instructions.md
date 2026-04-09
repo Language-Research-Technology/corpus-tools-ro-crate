@@ -68,10 +68,14 @@
 ### Testing
 
 - Framework: Mocha (installed as devDependency)
-- Test file: [test/collection-subcollections.spec.js](test/collection-subcollections.spec.js)
-- Pattern: Uses `beforeAll()` hooks, `Collector` initialization, `assert` assertions
-- Run tests: `npm test` (currently placeholder—expand test suite for new features)
-- Recommended: Add tests for library API in addition to CLI integration tests
+- Test files:
+  - [test/collection-bundled.spec.js](test/collection-bundled.spec.js) — Collector creation and library API validation tests (required fields, bundled conversion)
+  - [test/collection-distributed.spec.js](test/collection-distributed.spec.js) — Distributed mode: verifies OCFL object count, nesting, and repo layout
+  - [test/options-rocrate.spec.js](test/options-rocrate.spec.js) — `options.rocrate` injection: validates TypeError on invalid input, correct crate use, and that mutated root metadata is preserved in the written output
+- Pattern: Uses `before()`/`after()` hooks with `rimraf` for temp repo cleanup, `assert` for assertions
+- Run tests: `npm test`
+- Fixture data: `test_data/udhr-translations/` — UDHR translations corpus with subcollections (1 root + 4 RepositoryCollections, 12 RepositoryObjects)
+- Temp output: `temp/` directory (gitignored); cleaned up by `after()` hooks in each spec
 
 ## Project-Specific Patterns
 
@@ -94,7 +98,22 @@
 - **ldac-profile** (github): Profile definitions
 - **Siegfried** (external CLI): File format identification; optional but recommended for `--sf` flag
 
-## Development Notes
+### `options.rocrate` — Injecting a Pre-built Crate
+
+`convertRoCrateToOcfl()` accepts an optional `options.rocrate` parameter — a pre-built `ROCrate` instance (from `ro-crate-js`) that replaces the crate loaded from disk:
+
+```js
+import { ROCrate } from 'ro-crate';
+const crate = new ROCrate(json, { array: true, link: true });
+crate.root.name = 'Overridden name';
+await convertRoCrateToOcfl({ repoPath, dataDir, namespace, rocrate: crate });
+```
+
+- Must be a valid `ROCrate` instance; a plain object throws `TypeError`
+- When set, both `corpus.crate` **and** `corpus.rootDataset` must be updated so `mintArcpId()` targets the correct root entity
+- Useful for programmatic use, testing, and pre-processing crate metadata before writing to OCFL
+
+
 
 - **Distributed mode complexity**: The entity externalization logic (Map-based tracking, recursive `copyEntity()`) is non-obvious; document assumptions when modifying.
 - **Async operations**: Crate operations are async (`await itemCollection.addToRepo()`); maintain async/await chains.
