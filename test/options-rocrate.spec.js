@@ -13,6 +13,20 @@ const dataDir = 'test_data/udhr-translations';
 const repoPath = path.join('temp', 'test-rocrate-option-ocfl');
 const namespace = 'udhr-rocrate-option';
 
+function findOcflObjectDirs(dir) {
+    const results = [];
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const full = path.join(dir, entry.name);
+        if (entry.name === '__object__') {
+            results.push(full);
+        } else {
+            results.push(...findOcflObjectDirs(full));
+        }
+    }
+    return results;
+}
+
 /**
  * Load a fresh ROCrate from the test fixture and optionally mutate it.
  */
@@ -93,5 +107,41 @@ describe('options.rocrate', function () {
         const writtenName = Array.isArray(rootEntity.name) ? rootEntity.name[0] : rootEntity.name;
         assert.equal(writtenName, CUSTOM_NAME,
             `Written root name should be the injected value "${CUSTOM_NAME}", got "${writtenName}"`);
+    });
+
+    it('Should preserve descriptor-level license in distributed mode when JSON is injected via options.rocrate', async function () {
+        const DESCRIPTOR_LICENSE = 'https://example.org/licenses/custom-distributed';
+        const crate = loadTestCrate(c => {
+            const descriptor = c.getEntity('ro-crate-metadata.json') || { '@id': 'ro-crate-metadata.json' };
+            descriptor.license = [{ '@id': DESCRIPTOR_LICENSE }];
+            c.updateEntity('ro-crate-metadata.json', descriptor);
+        });
+
+        rimraf.sync(repoPath);
+        await convertRoCrateToOcfl({
+            repoPath,
+            dataDir,
+            namespace,
+            distributed: true,
+            rocrate: crate.toJSON()
+        });
+
+        const objectDirs = findOcflObjectDirs(repoPath);
+        assert.ok(objectDirs.length > 1, 'Expected distributed mode to produce multiple OCFL objects');
+
+        for (const objectDir of objectDirs) {
+            const versions = readdirSync(objectDir).filter(d => d.startsWith('v')).sort();
+            assert.ok(versions.length > 0, `Expected at least one version dir in ${objectDir}`);
+            const crateFile = path.join(objectDir, versions[versions.length - 1], 'content', 'ro-crate-metadata.json');
+            assert.ok(existsSync(crateFile), `ro-crate-metadata.json should exist at ${crateFile}`);
+
+            const written = JSON.parse(readFileSync(crateFile, 'utf8'));
+            const descriptor = written['@graph'].find(e => e['@id'] === 'ro-crate-metadata.json');
+            assert.ok(descriptor, `Descriptor should exist in ${crateFile}`);
+
+            const license = descriptor.license?.[0]?.['@id'];
+            assert.equal(license, DESCRIPTOR_LICENSE,
+                `Descriptor license should be preserved as ${DESCRIPTOR_LICENSE} in ${crateFile}, got ${license}`);
+        }
     });
 });
