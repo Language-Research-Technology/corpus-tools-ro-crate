@@ -144,4 +144,5 @@ describe('options.rocrate', function () {
                 `Descriptor license should be preserved as ${DESCRIPTOR_LICENSE} in ${crateFile}, got ${license}`);
         }
     });
+
 });
